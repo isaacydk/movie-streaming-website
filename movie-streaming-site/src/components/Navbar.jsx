@@ -16,7 +16,7 @@ export function Navbar({ activePage }) {
       <SearchBar />
 
       <nav className='nav-links'>
-        <Link className={activePage === 'home' ? 'active' : ''} to='/'>Home</Link>
+        <Link className={activePage === 'home' ? 'active' : ''} to='/home'>Home</Link>
         <Link className={activePage === 'favorites' ? 'active' : ''} to='/favorites'>Favorites</Link>
         <Link className={activePage === 'contact' ? 'active' : ''} to='/contact'>Contact</Link>
       </nav>
