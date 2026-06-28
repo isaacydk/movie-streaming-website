@@ -79,6 +79,13 @@
   pointer-events: none;
 }
 
+.nav-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: clamp(18px, 3vw, 28px);
+}
+
 .nav-links {
   display: flex;
   justify-content: flex-end;
@@ -116,6 +123,31 @@
   transform: scaleX(1);
 }
 
+.profile-circle {
+  display: grid;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  color: white;
+  font-size: 0.82rem;
+  font-weight: 800;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.profile-circle:hover,
+.profile-circle.active {
+  border-color: rgba(229, 9, 20, 0.75);
+  box-shadow: 0 0 20px rgba(229, 9, 20, 0.35);
+  transform: translateY(-1px);
+}
+
 @media (max-width: 900px) {
   .navbar {
     grid-template-columns: 1fr;
@@ -123,8 +155,13 @@
   }
 
   .brand,
-  .nav-links {
+  .nav-actions {
     justify-self: center;
+  }
+
+  .nav-actions {
+    width: 100%;
+    justify-content: center;
   }
 
   .nav-links {

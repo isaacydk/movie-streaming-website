@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { moviesRows } from '../data/MoviesRows'
-import { addUser, plans, userExists, verifyUser } from '../data/mockUsers'
+import { addUser, plans, setCurrentUser, userExists, verifyUser } from '../data/mockUsers'
 import './LandingPage.css'
 
 const allMovies = moviesRows.flatMap((row) => row.movies)
@@ -162,12 +162,13 @@ export function LandingPage() {
       return
     }
 
-    addUser({
+    const newUser = addUser({
       ...signupData,
       plan: selectedPlan,
       telebirrPhone: normalizedPhone,
     })
 
+    setCurrentUser(newUser.id)
     navigate('/home')
   }
 
@@ -192,6 +193,7 @@ export function LandingPage() {
       return
     }
 
+    setCurrentUser(matchedUser.id)
     navigate('/home')
   }
 
