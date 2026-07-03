@@ -1,6 +1,6 @@
 import { HeroSection } from "../components/HeroSection"
 import { Navbar } from "../components/Navbar"
-import { moviesRows } from '../data/MoviesRows'
+import { detailMovieRows } from '../data/DetailMovieRows'
 import { MovieRow } from '../components/MovieRow'
 
 export function Home() {
@@ -9,8 +9,8 @@ export function Home() {
       <Navbar activePage={'home'} />
       <HeroSection />
 
-      {moviesRows.length > 0 ? (
-        moviesRows.map((row) => (
+      {detailMovieRows.length > 0 ? (
+        detailMovieRows.map((row) => (
           <MovieRow key={row.title} title={row.title} movies={row.movies} />
         ))
       ) : (

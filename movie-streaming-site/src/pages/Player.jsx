@@ -1,21 +1,12 @@
 import { Link } from 'react-router-dom'
 import { Navbar } from '../components/Navbar'
-import { moviesRows } from '../data/MoviesRows'
+import { detailMovieRows } from '../data/DetailMovieRows'
 import playerVideo from '../data/type-vid.mp4'
 import './Player.css'
 
-const featuredMovie = {
-    ...moviesRows.flatMap((row) => row.movies).find((movie) => movie.id === 'batman'),
-    synopsis:
-        'A shadow-drenched crime thriller that follows Bruce Wayne as he uncovers corruption in Gotham and faces a killer targeting the city elite.',
-    director: 'Matt Reeves',
-    cast: 'Robert Pattinson, Zoë Kravitz, Paul Dano, Jeffrey Wright',
-    releaseYear: '2022',
-    runtime: '2h 56m',
-    maturity: '16+',
-    audio: 'English, Dolby Atmos',
-    subtitles: 'English, French, Spanish',
-}
+const featuredMovies = detailMovieRows.flatMap((row) => row.movies).filter((movie) => movie.id === 'morbius')
+
+const featuredMovie = featuredMovies[0]
 
 const highlights = [
     { label: 'Genre', value: featuredMovie.genre },

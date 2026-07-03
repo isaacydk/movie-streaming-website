@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { moviesRows } from '../data/MoviesRows'
+import { detailMovieRows } from '../data/DetailMovieRows'
 import { addUser, plans, setCurrentUser, userExists, verifyUser } from '../data/mockUsers'
 import './LandingPage.css'
 
-const allMovies = moviesRows.flatMap((row) => row.movies)
+const allMovies = detailMovieRows.flatMap((row) => row.movies)
 const heroMovies = allMovies.slice(0, 18)
 const trendingMovies = allMovies.slice(0, 5)
 
