@@ -3,6 +3,7 @@ import { Navbar } from '../components/Navbar'
 import { detailMovieRows } from '../data/DetailMovieRows'
 import playerVideo from '../data/type-vid.mp4'
 import './Player.css'
+import Footerbar from '../components/Footerbar'
 
 const featuredMovies = detailMovieRows.flatMap((row) => row.movies).filter((movie) => movie.id === 'morbius')
 
@@ -88,6 +89,7 @@ function Player() {
                     </section>
                 </div>
             </section>
+            <Footerbar/>
         </main>
     )
 }

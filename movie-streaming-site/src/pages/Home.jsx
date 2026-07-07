@@ -2,6 +2,7 @@ import { HeroSection } from "../components/HeroSection"
 import { Navbar } from "../components/Navbar"
 import { detailMovieRows } from '../data/DetailMovieRows'
 import { MovieRow } from '../components/MovieRow'
+import Footerbar from "../components/Footerbar"
 
 export function Home() {
   return (
@@ -18,6 +19,7 @@ export function Home() {
           <p>No movies found!</p>
         </div>
       )}
+      <Footerbar/>
     </>
   )
 }

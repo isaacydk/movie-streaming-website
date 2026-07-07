@@ -1,3 +1,4 @@
+import Footerbar from "../components/Footerbar"
 import { Navbar } from "../components/Navbar"
 
 function Favorites() {
@@ -15,6 +16,7 @@ function Favorites() {
           Browse Movies
         </button>
       </section>
+      <Footerbar/>
     </>
   )
 }
