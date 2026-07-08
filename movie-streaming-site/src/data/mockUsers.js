@@ -21,7 +21,7 @@ const users = [
     name: 'Demo User',
     age: 24,
     email: 'demo@redstream.com',
-    password: 'password123',
+    password: '123',
     plan: 'premium',
   },
 ]
