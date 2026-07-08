@@ -19,7 +19,7 @@ export function Navbar({ activePage }) {
 
   return (
     <header className="navbar">
-      <Link to='/' className='brand'>
+      <Link to='/home' className='brand'>
         <span className="brand-mark">M</span>
         <span>RedStream</span>
       </Link>
@@ -30,7 +30,7 @@ export function Navbar({ activePage }) {
 
       <div className="nav-actions">
         <nav className='nav-links'>
-          <Link className={activePage === 'home' ? 'active' : ''} to='/'>Home</Link>
+          <Link className={activePage === 'home' ? 'active' : ''} to='/home'>Home</Link>
           <Link className={activePage === 'favorites' ? 'active' : ''} to='/favorites'>Favorites</Link>
           <Link className={activePage === 'contact' ? 'active' : ''} to='/contact'>Contact</Link>
         </nav>

@@ -1,4 +1,5 @@
 import { Navbar } from "../components/Navbar"
+import './Contact.css'
 
 function Contact() {
   return (
@@ -12,9 +13,40 @@ function Contact() {
           help shape the next version of the streaming experience.
         </p>
         <a className="primary-button" href="mailto:hello@redstream.example">
-          Send Message
+          Send Via email
         </a>
+
+        <p>or Just fill the form</p>
+
+
+        {/* kalid */}
+
+
+        <div class="card">
+          <form id="contactForm">
+            <label for="name">Name</label>
+            <input type="text" id="name" required />
+
+            <label for="email">Email</label>
+            <input type="email" id="email" required />
+
+            <label for="message">Message</label>
+            <textarea id="message" required></textarea>
+
+            <button type="submit" class="send-btn">Send message</button>
+          </form>
+
+          <div class="confirmation" id="confirmation">
+            ✅ Your message was sent! The admin team will see it in their inbox.
+          </div>
+
+
+
+        </div >
       </section>
+
+
+
     </>
   )
 }

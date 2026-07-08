@@ -89,6 +89,22 @@ function Player() {
                   <span>Subtitles</span>
                   <strong>{movie.subtitles}</strong>
                 </div>
+                <div>
+                  <span>Maturity</span>
+                  <strong>{movie.maturity}</strong>
+                </div>
+                <div>
+                  <span>Release year</span>
+                  <strong>{movie.releaseYear}</strong>
+                </div>
+                <div>
+                  <span>Run time</span>
+                  <strong>{movie.runtime}</strong>
+                </div>
+                <div>
+                  <span>Genre</span>
+                  <strong>{movie.genre}</strong>
+                </div>
               </div>
 
               {/* <div className="player-summary-strip">
