@@ -1,7 +1,9 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom'
 import { Navbar } from '../components/Navbar'
 import { detailMovieRows } from '../data/DetailMovieRows'
+import { getCurrentUser } from '../data/mockUsers'
+import { isFavorite, toggleFavorite } from '../data/favorites'
 import playerVideo from '../data/type-vid.mp4'
 import './Player.css'
 import Footerbar from '../components/Footerbar'
@@ -20,6 +22,8 @@ import Footerbar from '../components/Footerbar'
 
 function Player() {
   const { id } = useParams();
+  const user = getCurrentUser()
+  const [isFav, setIsFav] = useState(() => isFavorite(user?.id, id))
 
   const movie = useMemo(() => {
     let data = null
@@ -42,6 +46,14 @@ function Player() {
   }, [id])
 
   if (!movie) return <p>Movie not found</p>;
+
+  const handleFavoriteClick = () => {
+    if (!user) {
+      alert('Please log in to save favorites.')
+      return
+    }
+    setIsFav(toggleFavorite(user.id, movie.id))
+  }
 
   return (
     <main className="player-page">
@@ -89,22 +101,6 @@ function Player() {
                   <span>Subtitles</span>
                   <strong>{movie.subtitles}</strong>
                 </div>
-                <div>
-                  <span>Maturity</span>
-                  <strong>{movie.maturity}</strong>
-                </div>
-                <div>
-                  <span>Release year</span>
-                  <strong>{movie.releaseYear}</strong>
-                </div>
-                <div>
-                  <span>Run time</span>
-                  <strong>{movie.runtime}</strong>
-                </div>
-                <div>
-                  <span>Genre</span>
-                  <strong>{movie.genre}</strong>
-                </div>
               </div>
 
               {/* <div className="player-summary-strip">
@@ -120,8 +116,13 @@ function Player() {
                 {/* <button className="primary-button" type="button">
                                     Play Now
                                 </button> */}
-                <button className="ghost-button" type="button">
-                  Add to Favorite
+                <button
+                  className="ghost-button"
+                  type="button"
+                  onClick={handleFavoriteClick}
+                  aria-pressed={isFav}
+                >
+                  {isFav ? 'Remove from Favorites' : 'Add to Favorites'}
                 </button>
                 <Link className="ghost-button secondary-link" to="/home">
                   Back to Home
