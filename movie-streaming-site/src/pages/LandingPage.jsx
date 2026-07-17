@@ -118,7 +118,7 @@ export function LandingPage() {
     setSignInData((currentData) => ({ ...currentData, [name]: value }))
   }
 
-  const handleSignupDetails = (event) => {
+  const handleSignupDetails = async (event) => {
     event.preventDefault()
     resetFeedback()
 
@@ -146,6 +146,28 @@ export function LandingPage() {
     if (!signupData.password.trim()) {
       setError('Create a password.')
       return
+    }
+
+    const userData = {
+      name: signupData.name,
+      email: signupData.email,
+      password: signupData.password,
+
+    }
+    // Send signup data to backend PHP endpoint
+    try {
+      const response = await fetch("http://localhost/backend/api/signup.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(userData)
+      });
+
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.error("Error:", error);
     }
 
     setFlow('payment')
@@ -196,6 +218,9 @@ export function LandingPage() {
     setCurrentUser(matchedUser.id)
     navigate('/home')
   }
+
+
+
 
   return (
     <main className="landing-page">
@@ -266,7 +291,7 @@ export function LandingPage() {
           <div className="reason-grid">
             {reasons.map((reason) => (
               <article className="reason-card" key={reason.title}>
-                <h3>{reason.title}</h3>
+                <h3>{reason.handleSignIntitle}</h3>
                 <p>{reason.body}</p>
                 <span className={`reason-icon reason-icon-${reason.icon}`} aria-hidden="true" />
               </article>
