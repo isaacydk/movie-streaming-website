@@ -1,6 +1,10 @@
+
+This one the Landing page that the choose plane window removed
+
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { detailMovieRows } from '../data/DetailMovieRows'
+import { addUser, setCurrentUser, userExists, verifyUser } from '../data/mockUsers'
 import './LandingPage.css'
 
 const allMovies = detailMovieRows.flatMap((row) => row.movies)
@@ -32,9 +36,9 @@ const reasons = [
 
 const initialSignupData = {
   name: '',
+  age: '',
   email: '',
   password: '',
-  password2: '',
 }
 
 const initialSignInData = {
@@ -71,7 +75,7 @@ export function LandingPage() {
 
   const closeFlow = () => {
     setFlow('none')
-
+   
     setSignupData(initialSignupData)
     setSignInData(initialSignInData)
     setTelebirrPhone('')
@@ -86,6 +90,13 @@ export function LandingPage() {
 
     if (!emailPattern.test(normalizedEmail)) {
       setError('Enter a valid email address to continue.')
+      return
+    }
+
+    if (userExists(normalizedEmail)) {
+      setMessage('This email already has an account. Sign in to continue watching.')
+      setFlow('sign-in')
+      setSignInData({ email: normalizedEmail, password: '' })
       return
     }
 
@@ -104,7 +115,7 @@ export function LandingPage() {
     setSignInData((currentData) => ({ ...currentData, [name]: value }))
   }
 
-  const handleSignupDetails = (event) => {
+  const handleSignupDetails = async (event) => {
     event.preventDefault()
     resetFeedback()
 
@@ -113,6 +124,10 @@ export function LandingPage() {
       return
     }
 
+    if (!Number.isInteger(Number(signupData.age)) || Number(signupData.age) < 13) {
+      setError('Enter an age of 13 or older.')
+      return
+    }
 
     if (!emailPattern.test(signupData.email.trim().toLowerCase())) {
       setError('Enter a valid email address.')
@@ -123,30 +138,10 @@ export function LandingPage() {
       setError('Create a password.')
       return
     }
-    if (signupData.password.trim() !== signupData.password2.trim()) {
-      setError('Your password does not match.')
-      return
-    }
-
-    setFlow('payment')
-  }
-
-  const handleTelebirrPayment = async (event) => {
-    event.preventDefault()
-    resetFeedback()
-
-    const normalizedPhone = telebirrPhone.replace(/\s+/g, '')
-
-    if (!ethiopianPhonePattern.test(normalizedPhone)) {
-      setError('Enter a valid Telebirr phone number, like 0912345678 or +251912345678.')
-      return
-    }
-
 
     const userData = {
       name: signupData.name,
       email: signupData.email,
-      phone: telebirrPhone,
       password: signupData.password,
 
     }
@@ -166,8 +161,27 @@ export function LandingPage() {
       console.error("Error:", error);
     }
 
+    setFlow('payment')
+  }
 
+  const handleTelebirrPayment = (event) => {
+    event.preventDefault()
+    resetFeedback()
 
+    const normalizedPhone = telebirrPhone.replace(/\s+/g, '')
+
+    if (!ethiopianPhonePattern.test(normalizedPhone)) {
+      setError('Enter a valid Telebirr phone number, like 0912345678 or +251912345678.')
+      return
+    }
+
+    const newUser = addUser({
+      ...signupData,
+
+      telebirrPhone: normalizedPhone,
+    })
+
+    setCurrentUser(newUser.id)
     navigate('/home')
   }
 
@@ -185,6 +199,14 @@ export function LandingPage() {
       return
     }
 
+    const matchedUser = verifyUser(signInData.email, signInData.password)
+
+    if (!matchedUser) {
+      setError('No account found with that email and password.')
+      return
+    }
+
+    setCurrentUser(matchedUser.id)
     navigate('/home')
   }
 
@@ -293,6 +315,17 @@ export function LandingPage() {
                   />
                 </label>
                 <label>
+                  Age
+                  <input
+                    name="age"
+                    type="number"
+                    min="13"
+                    value={signupData.age}
+                    onChange={updateSignupData}
+                    placeholder="13+"
+                  />
+                </label>
+                <label>
                   Email
                   <input name="email" type="email" value={signupData.email} onChange={updateSignupData} />
                 </label>
@@ -304,16 +337,6 @@ export function LandingPage() {
                     value={signupData.password}
                     onChange={updateSignupData}
                     placeholder="Create a password"
-                  />
-                </label>
-                <label>
-                  Conform Password
-                  <input
-                    name="password2"
-                    type="password"
-                    value={signupData.password2}
-                    onChange={updateSignupData}
-                    placeholder="Conform password"
                   />
                 </label>
                 {error ? <p className="flow-error">{error}</p> : null}
