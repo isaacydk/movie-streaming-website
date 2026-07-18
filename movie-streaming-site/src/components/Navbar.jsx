@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { SearchBar } from './SearchBar'
-import { getCurrentUser } from '../data/mockUsers'
+// import { getCurrentUser } from '../data/mockUsers'
 import './Navbar.css'
 
 function getInitials(name) {
@@ -14,8 +14,8 @@ function getInitials(name) {
 }
 
 export function Navbar({ activePage }) {
-  const user = getCurrentUser()
-  const initials = user ? getInitials(user.name) : '?'
+  const user = JSON.parse(localStorage.getItem("user"));
+  const initials = user ? getInitials(user.full_name) : '?'
 
   return (
     <header className="navbar">

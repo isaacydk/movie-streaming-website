@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Navbar } from '../components/Navbar'
-import { getCurrentUser, plans, updateUser } from '../data/mockUsers'
+import { plans, updateUser } from '../data/mockUsers'
 import { getFavoritesCount } from '../data/favorites'
 import './Profile.css'
 
@@ -18,7 +18,7 @@ function getInitials(name) {
 }
 
 function Profile() {
-  const [user, setUser] = useState(() => getCurrentUser())
+  const user = JSON.parse(localStorage.getItem("user"));
   const [isEditing, setIsEditing] = useState(false)
   const [editForm, setEditForm] = useState({ name: '', email: '', age: '' })
   const [editError, setEditError] = useState('')
@@ -28,9 +28,9 @@ function Profile() {
 
   const startEditing = () => {
     setEditForm({
-      name: user.name,
+      name: user.full_name,
       email: user.email,
-      age: String(user.age),
+      phone: user.phone,
     })
     setEditError('')
     setIsEditing(true)
@@ -62,7 +62,7 @@ function Profile() {
       return
     }
 
-    setUser(result.user)
+    // setUser(result.user)
     setIsEditing(false)
   }
 
@@ -92,14 +92,14 @@ function Profile() {
 
             <div className="profile-header">
               <div className="profile-avatar" aria-hidden="true">
-                {getInitials(isEditing ? editForm.name : user.name)}
+                {getInitials(isEditing ? editForm.name : user.full_name)}
               </div>
               <div className="profile-identity">
                 {isEditing ? (
                   <h1>Edit your details</h1>
                 ) : (
                   <>
-                    <h1>{user.name}</h1>
+                    <h1>{user.full_name}</h1>
                     {plan ? <span className="profile-plan-badge">{plan.name}</span> : null}
                   </>
                 )}
@@ -144,8 +144,8 @@ function Profile() {
                     <span className="profile-detail-value">{user.email}</span>
                   </div>
                   <div className="profile-detail-row">
-                    <span className="profile-detail-label">Age</span>
-                    <span className="profile-detail-value">{user.age}</span>
+                    <span className="profile-detail-label">phone</span>
+                    <span className="profile-detail-value">{user.phone}</span>
                   </div>
                 </div>
 

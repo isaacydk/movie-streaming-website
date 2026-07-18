@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import Footerbar from '../components/Footerbar'
 import { Navbar } from '../components/Navbar'
 import { MovieRow } from '../components/MovieRow'
-import { getCurrentUser } from '../data/mockUsers'
 import { getFavoriteIds } from '../data/favorites'
 import { detailMovieRows } from '../data/DetailMovieRows'
 
@@ -31,7 +30,7 @@ function getAllMovies() {
 }
 
 function Favorites() {
-  const [user] = useState(() => getCurrentUser())
+  const user = JSON.parse(localStorage.getItem("user"));
   const [favoriteMovies] = useState(() => {
     if (!user) return []
 

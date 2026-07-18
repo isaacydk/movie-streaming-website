@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom'
 import { Navbar } from '../components/Navbar'
 import { detailMovieRows } from '../data/DetailMovieRows'
-import { getCurrentUser } from '../data/mockUsers'
 import { isFavorite, toggleFavorite } from '../data/favorites'
 import playerVideo from '../data/type-vid.mp4'
 import './Player.css'
@@ -22,7 +21,7 @@ import Footerbar from '../components/Footerbar'
 
 function Player() {
   const { id } = useParams();
-  const user = getCurrentUser()
+  const user = JSON.parse(localStorage.getItem("user"));
   const [isFav, setIsFav] = useState(() => isFavorite(user?.id, id))
 
   const movie = useMemo(() => {

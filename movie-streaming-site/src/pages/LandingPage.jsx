@@ -171,7 +171,7 @@ export function LandingPage() {
     navigate('/home')
   }
 
-  const handleSignIn = (event) => {
+  const handleSignIn = async (event) => {
     event.preventDefault()
     resetFeedback()
 
@@ -185,7 +185,37 @@ export function LandingPage() {
       return
     }
 
-    navigate('/home')
+    try {
+      const response = await fetch("http://localhost/backend/api/login.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: signInData.email,
+          password: signInData.password
+        })
+      });
+
+      const data = await response.json();
+      console.log(data);
+
+      if (data.error) {
+        setError(data.error);
+        return;
+      }
+
+      // ✅ store user (no JWT)
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      // ✅ redirect
+      navigate("/home");
+
+    } catch (err) {
+      console.error(err);
+      setError("Server error");
+    }
+
   }
 
 
