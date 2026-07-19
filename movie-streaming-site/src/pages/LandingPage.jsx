@@ -175,6 +175,40 @@ export function LandingPage() {
       console.error("Error:", error);
       setError("Server error. Please try again.");
     }
+
+    try {
+      const response = await fetch("http://localhost/backend/api/login.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: signupData.email,
+          password: signupData.password
+        })
+      });
+
+      const data = await response.json();
+      console.log(data);
+
+      if (data.error) {
+        setError(data.error);
+        return;
+      }
+
+      // ✅ store user (no JWT)
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      // ✅ redirect
+      navigate("/home");
+
+    } catch (err) {
+      console.error(err);
+      setError("Server error");
+    }
+
+
+    navigate('/home')
   }
 
   const handleSignIn = async (event) => {
