@@ -26,7 +26,23 @@ function getAllMovies() {
     rows = detailMovieRows
   }
 
-  return rows.flatMap((row) => row.movies)
+  // A movie can appear in more than one homepage row (e.g. a title can be
+  // both "Popular" and "Trending" at the same time). Flattening all rows
+  // together would otherwise produce duplicate entries for that movie -
+  // one from its first row, one from its last - which is what caused a
+  // favorited movie to render twice in the list. Dedupe by id, keeping
+  // the first occurrence.
+  const seen = new Set()
+  const uniqueMovies = []
+
+  for (const movie of rows.flatMap((row) => row.movies)) {
+    if (!seen.has(movie.id)) {
+      seen.add(movie.id)
+      uniqueMovies.push(movie)
+    }
+  }
+
+  return uniqueMovies
 }
 
 function Favorites() {

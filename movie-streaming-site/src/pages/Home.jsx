@@ -63,9 +63,11 @@ export function Home() {
       <HeroSection />
 
       {movies.length > 0 ? (
-        movies.map((row) => (
-          <MovieRow key={row.title} title={row.title} movies={row.movies} />
-        ))
+        <div className="content-section">
+          {movies.map((row) => (
+            <MovieRow key={row.title} title={row.title} movies={row.movies} />
+          ))}
+        </div>
       ) : (
         <div className="empty-state">
           <p>Loading Movies...</p>
