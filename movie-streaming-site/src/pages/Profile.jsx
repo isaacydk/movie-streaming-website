@@ -83,11 +83,18 @@ function Profile() {
           <>
             <div className="profile-top-row">
               <p className="eyebrow">Your account</p>
-              {!isEditing ? (
-                <button className="profile-edit-button" type="button" onClick={startEditing}>
-                  Edit Profile
-                </button>
-              ) : null}
+              <div className="profile-top-actions">
+                {user.role === 'admin' ? (
+                  <Link className="profile-admin-button" to="/admin">
+                    Admin Dashboard
+                  </Link>
+                ) : null}
+                {!isEditing ? (
+                  <button className="profile-edit-button" type="button" onClick={startEditing}>
+                    Edit Profile
+                  </button>
+                ) : null}
+              </div>
             </div>
 
             <div className="profile-header">

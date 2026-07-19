@@ -161,14 +161,20 @@ export function LandingPage() {
       });
 
       const data = await response.json();
-      console.log(data);
+
+      if (data.error) {
+        setError(data.error);
+        return;
+      }
+
+      // ✅ store user (no JWT) and log them straight in, same as sign-in
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      navigate('/home')
     } catch (error) {
       console.error("Error:", error);
+      setError("Server error. Please try again.");
     }
-
-
-
-    navigate('/home')
   }
 
   const handleSignIn = async (event) => {
@@ -406,7 +412,6 @@ export function LandingPage() {
                 <button className="flow-submit" type="submit">
                   Sign In
                 </button>
-                <p className="demo-hint">Demo account: demo@redstream.com / password123</p>
               </form>
             ) : null}
           </section>

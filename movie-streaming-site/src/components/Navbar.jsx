@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import { SearchBar } from './SearchBar'
-// import { getCurrentUser } from '../data/mockUsers'
 import './Navbar.css'
 
 function getInitials(name) {

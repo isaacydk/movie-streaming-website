@@ -492,8 +492,7 @@
 }
 
 .flow-copy,
-.flow-message,
-.demo-hint {
+.flow-message {
   margin: 14px 0 0;
   color: rgba(255, 255, 255, 0.74);
   line-height: 1.5;
@@ -507,9 +506,7 @@
   border-radius: 6px;
 }
 
-.demo-hint {
-  font-size: 0.9rem;
-}
+
 
 .plan-grid {
   display: grid;

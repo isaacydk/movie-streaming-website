@@ -14,6 +14,33 @@
   margin: 0;
 }
 
+.profile-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-admin-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 16px;
+  color: white;
+  background: var(--red);
+  border: 1px solid var(--red);
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 800;
+  transition:
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.profile-admin-button:hover {
+  background: #ff2130;
+  transform: translateY(-1px);
+}
+
 .profile-edit-button {
   min-height: 38px;
   padding: 0 16px;
@@ -337,6 +364,11 @@
     width: 100%;
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .profile-top-actions {
+    width: 100%;
+    flex-wrap: wrap;
   }
 
   .profile-header {

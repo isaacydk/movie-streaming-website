@@ -1,7 +1,49 @@
+import { useState } from "react"
 import { Navbar } from "../components/Navbar"
 import './Contact.css'
 
 function Contact() {
+  const storedUser = JSON.parse(localStorage.getItem("user") || "null")
+
+  const [form, setForm] = useState({
+    name: storedUser?.full_name || '',
+    email: storedUser?.email || '',
+    message: '',
+  })
+  const [status, setStatus] = useState('idle') // idle | sending | sent | error
+  const [error, setError] = useState('')
+
+  const handleChange = (event) => {
+    const { id, value } = event.target
+    setForm((current) => ({ ...current, [id]: value }))
+  }
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    setStatus('sending')
+    setError('')
+
+    try {
+      const response = await fetch("http://localhost/backend/api/contact.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok || data.error) {
+        throw new Error(data.error || "Something went wrong")
+      }
+
+      setStatus('sent')
+      setForm((current) => ({ ...current, message: '' }))
+    } catch (err) {
+      setStatus('error')
+      setError(err.message)
+    }
+  }
+
   return (
     <>
       <Navbar activePage={'contact'} />
@@ -18,39 +60,37 @@ function Contact() {
 
         <p>or Just fill the form</p>
 
+        <div className="card">
+          <form id="contactForm" onSubmit={handleSubmit}>
+            <label htmlFor="name">Name</label>
+            <input type="text" id="name" value={form.name} onChange={handleChange} required />
 
-        {/* kalid */}
+            <label htmlFor="email">Email</label>
+            <input type="email" id="email" value={form.email} onChange={handleChange} required />
 
+            <label htmlFor="message">Message</label>
+            <textarea id="message" value={form.message} onChange={handleChange} required></textarea>
 
-        <div class="card">
-          <form id="contactForm">
-            <label for="name">Name</label>
-            <input type="text" id="name" required />
-
-            <label for="email">Email</label>
-            <input type="email" id="email" required />
-
-            <label for="message">Message</label>
-            <textarea id="message" required></textarea>
-
-            <button type="submit" class="send-btn">Send message</button>
+            <button type="submit" className="send-btn" disabled={status === 'sending'}>
+              {status === 'sending' ? 'Sending…' : 'Send message'}
+            </button>
           </form>
 
-          <div class="confirmation" id="confirmation">
-            ✅ Your message was sent! The admin team will see it in their inbox.
-          </div>
+          {status === 'sent' ? (
+            <div className="confirmation" style={{ display: 'block' }}>
+              ✅ Your message was sent! The admin team will see it in their inbox.
+            </div>
+          ) : null}
 
-
-
-        </div >
+          {status === 'error' ? (
+            <div className="confirmation" style={{ display: 'block', background: '#3a1c1c', borderColor: '#6b2e2e', color: '#d19e9e' }}>
+              ⚠️ {error || 'Could not send your message. Please try again.'}
+            </div>
+          ) : null}
+        </div>
       </section>
-
-
-
     </>
   )
 }
 
 export default Contact
-
-
