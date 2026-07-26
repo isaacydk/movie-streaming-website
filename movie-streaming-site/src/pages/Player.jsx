@@ -46,6 +46,11 @@ function Player() {
 
   if (!movie) return <p>Movie not found</p>;
 
+  // Prefer the real file attached in the Admin panel / movie_content table.
+  // Falls back to the local placeholder clip for movies that don't have a
+  // file linked yet (e.g. freshly TMDB-synced titles you haven't filled in).
+  const videoSrc = movie.content?.fileUrl || playerVideo
+
   const handleFavoriteClick = () => {
     if (!user) {
       alert('Please log in to save favorites.')
@@ -64,7 +69,7 @@ function Player() {
             <div className="player-screen" aria-label={`${movie.title} player placeholder`}>
               <video
                 className="player-video"
-                src={playerVideo}
+                src={videoSrc}
                 poster={movie.poster}
                 muted
                 controls
