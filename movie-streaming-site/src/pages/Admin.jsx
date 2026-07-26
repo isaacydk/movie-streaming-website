@@ -775,18 +775,19 @@ function ReportsPanel({ adminId }) {
 
   const selected = reports.find((r) => r.id === selectedId) || null
 
-  const openReport = async (report) => {
+  const openReport = (report) => {
     setSelectedId(report.id)
-    if (!report.isRead) {
-      try {
-        await callApi('reports.php', adminId, {
-          method: 'PATCH',
-          body: JSON.stringify({ id: report.id, isRead: true }),
-        })
-        setReports((current) => current.map((r) => (r.id === report.id ? { ...r, isRead: true } : r)))
-      } catch {
-        // non-fatal, ignore
-      }
+  }
+
+  const setReadStatus = async (report, isRead) => {
+    try {
+      await callApi('reports.php', adminId, {
+        method: 'PATCH',
+        body: JSON.stringify({ id: report.id, isRead }),
+      })
+      setReports((current) => current.map((r) => (r.id === report.id ? { ...r, isRead } : r)))
+    } catch (err) {
+      alert(err.message)
     }
   }
 
@@ -853,11 +854,30 @@ function ReportsPanel({ adminId }) {
                       {new Date(selected.submittedAt).toLocaleString()}
                     </p>
                   </div>
-                  <button className="admin-danger-button" onClick={() => deleteReport(selected)}>
-                    Delete
-                  </button>
+                  <div className="admin-report-detail-actions">
+                    {selected.isRead ? (
+                      <button
+                        className="ghost-button"
+                        onClick={() => setReadStatus(selected, false)}
+                      >
+                        Mark as unread
+                      </button>
+                    ) : (
+                      <button
+                        className="ghost-button"
+                        onClick={() => setReadStatus(selected, true)}
+                      >
+                        Mark as read
+                      </button>
+                    )}
+                    <button className="admin-danger-button" onClick={() => deleteReport(selected)}>
+                      Delete
+                    </button>
+                  </div>
                 </div>
-                <p className="admin-report-message">{selected.message}</p>
+                <p className={`admin-report-message ${!selected.isRead ? 'blurred' : ''}`}>
+                  {selected.message}
+                </p>
               </>
             ) : (
               <div className="empty-state">Select a message to read it.</div>

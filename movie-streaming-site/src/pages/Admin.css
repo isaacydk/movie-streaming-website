@@ -511,10 +511,24 @@
   font-size: 1.2rem;
 }
 
+.admin-report-detail-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
 .admin-report-message {
   color: var(--muted-strong);
   line-height: 1.7;
   white-space: pre-wrap;
+  filter: blur(0);
+  transition: filter 200ms ease;
+}
+
+.admin-report-message.blurred {
+  filter: blur(6px);
+  user-select: none;
+  pointer-events: none;
 }
 
 @media (max-width: 860px) {
