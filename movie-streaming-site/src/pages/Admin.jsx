@@ -1,8 +1,22 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { HOME_MOVIES_CACHE_KEY } from '../hooks/useHomeMovies'
 import './Admin.css'
 
 const API_BASE = 'http://localhost/backend/api/admin'
+
+// Home.jsx / LandingPage.jsx cache movies.php's response in localStorage for
+// a few minutes (see useHomeMovies.js) so they're not hitting the DB on
+// every visit. Any admin change (create/edit/delete/sync) makes that cache
+// stale immediately, so we clear it here - the next Home/Landing load then
+// fetches fresh data instead of showing a deleted/edited movie.
+function invalidateHomeMoviesCache() {
+  try {
+    localStorage.removeItem(HOME_MOVIES_CACHE_KEY)
+  } catch {
+    // localStorage unavailable (e.g. private mode edge case) - non-fatal
+  }
+}
 
 const EMPTY_MOVIE = {
   id: '',
@@ -22,7 +36,11 @@ const EMPTY_MOVIE = {
   fileFormat: '',
   resolution: '',
   isActive: true,
+  categories: [],
 }
+
+// Keep in sync with the movie_categories ENUM in db-data3.sql.
+const MOVIE_CATEGORIES = ['Popular', 'Top Rated', 'Trending']
 
 const MOVIE_JSON_TEMPLATE = [
   {
@@ -43,6 +61,7 @@ const MOVIE_JSON_TEMPLATE = [
     fileFormat: 'mp4',
     resolution: '1080p',
     isActive: true,
+    categories: ['Popular'],
   },
 ]
 
@@ -187,6 +206,8 @@ function MoviesPanel({ adminId }) {
   const [importText, setImportText] = useState('')
   const [importBusy, setImportBusy] = useState(false)
   const [importResult, setImportResult] = useState(null)
+  const [syncBusy, setSyncBusy] = useState(false)
+  const [syncResult, setSyncResult] = useState(null)
 
   const loadMovies = async () => {
     setLoading(true)
@@ -226,6 +247,7 @@ function MoviesPanel({ adminId }) {
       fileFormat: movie.content?.fileFormat || '',
       resolution: movie.content?.resolution || '',
       isActive: movie.content?.isActive ?? true,
+      categories: movie.categories || [],
     })
     setFormError('')
     setShowForm(true)
@@ -239,6 +261,18 @@ function MoviesPanel({ adminId }) {
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target
     setForm((current) => ({ ...current, [name]: type === 'checkbox' ? checked : value }))
+  }
+
+  const toggleCategory = (category) => {
+    setForm((current) => {
+      const has = current.categories.includes(category)
+      return {
+        ...current,
+        categories: has
+          ? current.categories.filter((c) => c !== category)
+          : [...current.categories, category],
+      }
+    })
   }
 
   const handleSubmit = async (event) => {
@@ -264,6 +298,7 @@ function MoviesPanel({ adminId }) {
         })
       }
       await loadMovies()
+      invalidateHomeMoviesCache()
       closeForm()
     } catch (err) {
       setFormError(err.message)
@@ -277,8 +312,27 @@ function MoviesPanel({ adminId }) {
     try {
       await callApi(`movies.php?id=${encodeURIComponent(movie.id)}`, adminId, { method: 'DELETE' })
       setMovies((current) => current.filter((m) => m.id !== movie.id))
+      invalidateHomeMoviesCache()
     } catch (err) {
       alert(err.message)
+    }
+  }
+
+  const handleSyncNow = async () => {
+    setSyncBusy(true)
+    setSyncResult(null)
+    try {
+      const data = await callApi('sync-tmdb.php', adminId, { method: 'POST' })
+      setSyncResult({
+        ok: true,
+        text: `Synced ${data.moviesUpserted} movie${data.moviesUpserted === 1 ? '' : 's'} (${data.categoryLinksAdded} new category link${data.categoryLinksAdded === 1 ? '' : 's'}).${data.errors?.length ? ` ${data.errors.length} warning(s) - check backend/logs/sync.log.` : ''}`,
+      })
+      await loadMovies()
+      invalidateHomeMoviesCache()
+    } catch (err) {
+      setSyncResult({ ok: false, text: err.message })
+    } finally {
+      setSyncBusy(false)
     }
   }
 
@@ -334,6 +388,7 @@ function MoviesPanel({ adminId }) {
     setImportBusy(false)
     if (successCount > 0) {
       await loadMovies()
+      invalidateHomeMoviesCache()
     }
   }
 
@@ -342,12 +397,25 @@ function MoviesPanel({ adminId }) {
       <div className="admin-panel-header">
         <div>
           <h1>Movies</h1>
-          <p>Edit or remove existing titles, and add new ones by importing JSON.</p>
+          <p>
+            Edit or remove existing titles, add new ones by importing JSON, or pull fresh
+            titles in from TMDB. A scheduled task also runs this sync periodically in the
+            background (see backend/scripts/sync_tmdb.php).
+          </p>
         </div>
-        <button className="primary-button" onClick={openImport}>
-          + Add Movies (Import JSON)
-        </button>
+        <div className="admin-row-actions">
+          <button className="ghost-button" onClick={handleSyncNow} disabled={syncBusy}>
+            {syncBusy ? 'Syncing…' : 'Sync TMDB Now'}
+          </button>
+          <button className="primary-button" onClick={openImport}>
+            + Add Movies (Import JSON)
+          </button>
+        </div>
       </div>
+
+      {syncResult ? (
+        <p className={syncResult.ok ? 'admin-loading' : 'admin-error'}>{syncResult.text}</p>
+      ) : null}
 
       {error ? <p className="admin-error">{error}</p> : null}
 
@@ -365,7 +433,8 @@ function MoviesPanel({ adminId }) {
                 <th>Genre</th>
                 <th>Year</th>
                 <th>Rating</th>
-                <th>Maturity</th>
+                <th>Source</th>
+                <th>Categories</th>
                 <th>Video</th>
                 <th></th>
               </tr>
@@ -385,7 +454,18 @@ function MoviesPanel({ adminId }) {
                   <td>{movie.genre || '—'}</td>
                   <td>{movie.releaseYear || '—'}</td>
                   <td>{movie.rating ? Number(movie.rating).toFixed(1) : '—'}</td>
-                  <td>{movie.maturity || '—'}</td>
+                  <td>
+                    <span className={`admin-badge ${movie.source === 'tmdb' ? 'admin-badge-muted' : 'admin-badge-active'}`}>
+                      {movie.source === 'tmdb' ? 'TMDB' : 'Admin'}
+                    </span>
+                  </td>
+                  <td>
+                    {movie.categories?.length ? (
+                      <span className="admin-subtle">{movie.categories.join(', ')}</span>
+                    ) : (
+                      <span className="admin-badge admin-badge-danger">Not on Home</span>
+                    )}
+                  </td>
                   <td>
                     {movie.content?.fileUrl ? (
                       <span className="admin-badge admin-badge-active">Linked</span>
@@ -487,6 +567,24 @@ function MoviesPanel({ adminId }) {
                   Synopsis
                   <textarea name="synopsis" value={form.synopsis} onChange={handleChange} rows={3} />
                 </label>
+              </div>
+
+              <hr className="admin-divider" />
+              <p className="admin-subheading">
+                Home page categories
+                <span className="admin-subtle"> — a movie only shows up on Home if it's in at least one of these.</span>
+              </p>
+              <div className="admin-category-group">
+                {MOVIE_CATEGORIES.map((category) => (
+                  <label key={category} className="admin-checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={form.categories.includes(category)}
+                      onChange={() => toggleCategory(category)}
+                    />
+                    {category}
+                  </label>
+                ))}
               </div>
 
               <hr className="admin-divider" />

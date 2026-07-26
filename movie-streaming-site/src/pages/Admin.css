@@ -396,6 +396,13 @@
   border-top: 1px solid var(--line);
 }
 
+.admin-category-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-bottom: 4px;
+}
+
 .admin-subheading {
   margin: 0 0 12px;
   color: var(--muted);

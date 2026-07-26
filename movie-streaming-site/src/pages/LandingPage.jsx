@@ -1,11 +1,13 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { detailMovieRows } from '../data/DetailMovieRows'
+import { useHomeMovies } from '../hooks/useHomeMovies'
 import './LandingPage.css'
 
-const allMovies = detailMovieRows.flatMap((row) => row.movies)
-const heroMovies = allMovies.slice(0, 18)
-const trendingMovies = allMovies.slice(0, 5)
+// Static fallback data, used only until the database has synced/admin-added
+// movies to show (e.g. right after a fresh install, before the first TMDB
+// sync or admin entry has happened).
+const fallbackMovies = detailMovieRows.flatMap((row) => row.movies)
 
 const reasons = [
   {
@@ -47,6 +49,16 @@ const ethiopianPhonePattern = /^(?:\+251|0)9\d{8}$/
 
 export function LandingPage() {
   const navigate = useNavigate()
+  const categorizedMovies = useHomeMovies()
+
+  const allMovies = useMemo(() => {
+    const flattened = categorizedMovies.flatMap((row) => row.movies)
+    return flattened.length > 0 ? flattened : fallbackMovies
+  }, [categorizedMovies])
+
+  const heroMovies = allMovies.slice(0, 18)
+  const trendingMovies = allMovies.slice(0, 5)
+
   const [email, setEmail] = useState('')
   const [flow, setFlow] = useState('none')
   const [signupData, setSignupData] = useState(initialSignupData)
