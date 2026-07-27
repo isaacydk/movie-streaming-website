@@ -39,6 +39,11 @@ function Profile() {
     setIsEditing(true)
   }
 
+  const logout = () => {
+    localStorage.removeItem('user')
+    setUser(null)
+  }
+
   const cancelEditing = () => {
     setIsEditing(false)
     setEditError('')
@@ -123,9 +128,14 @@ function Profile() {
                   </Link>
                 ) : null}
                 {!isEditing ? (
-                  <button className="profile-edit-button" type="button" onClick={startEditing}>
-                    Edit Profile
-                  </button>
+                  <>
+                    <button className="profile-edit-button" type="button" onClick={startEditing}>
+                      Edit Profile
+                    </button>
+                    <Link className="profile-edit-button" to="/" onClick={logout}>
+                      Log Out
+                    </Link>
+                  </>
                 ) : null}
               </div>
             </div>

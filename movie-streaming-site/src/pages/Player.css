@@ -24,7 +24,6 @@
   position: relative;
   overflow: hidden;
   aspect-ratio: 16 / 9;
-  min-height: clamp(320px, 52vw, 660px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 22px;
     background:
@@ -232,7 +231,6 @@
   }
 
   .player-screen {
-    min-height: 520px;
     border-radius: 18px;
   }
 

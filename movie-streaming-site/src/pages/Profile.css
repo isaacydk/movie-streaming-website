@@ -4,7 +4,7 @@
 
 .profile-top-row {
   display: flex;
-  width: min(100%, 520px);
+  width: 100%;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
@@ -43,7 +43,7 @@
 
 .profile-edit-button {
   min-height: 38px;
-  padding: 0 16px;
+  padding: 10px 16px;
   color: white;
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.28);
