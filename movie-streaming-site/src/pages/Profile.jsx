@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Navbar } from '../components/Navbar'
-import { getFavoritesCount } from '../data/favorites'
+import { useFavoriteIds } from '../hooks/useFavoriteIds'
 import './Profile.css'
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -26,7 +26,8 @@ function Profile() {
   const [editError, setEditError] = useState('')
   const [saving, setSaving] = useState(false)
 
-  const favoritesCount = user ? getFavoritesCount(user.id) : 0
+  const { favoriteIds } = useFavoriteIds(user?.id)
+  const favoritesCount = favoriteIds.length
 
   const startEditing = () => {
     setEditForm({

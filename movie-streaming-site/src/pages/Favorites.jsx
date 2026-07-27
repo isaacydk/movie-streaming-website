@@ -3,21 +3,19 @@ import { Link } from 'react-router-dom'
 import Footerbar from '../components/Footerbar'
 import { Navbar } from '../components/Navbar'
 import { MovieRow } from '../components/MovieRow'
-import { getFavoriteIds } from '../data/favorites'
 import { useHomeMovies } from '../hooks/useHomeMovies'
+import { useFavoriteIds } from '../hooks/useFavoriteIds'
 
 function Favorites() {
   const user = JSON.parse(localStorage.getItem("user"));
   const categorizedMovies = useHomeMovies()
+  const { favoriteIds, loaded } = useFavoriteIds(user?.id)
 
   // A movie can appear in more than one homepage row (e.g. a title can be
   // both "Popular" and "Trending" at the same time). Flattening all rows
   // together would otherwise produce duplicate entries for that movie -
   // one from its first row, one from its last - so we dedupe by id.
   const favoriteMovies = useMemo(() => {
-    if (!user) return []
-
-    const favoriteIds = getFavoriteIds(user.id)
     const seen = new Set()
     const unique = []
 
@@ -29,7 +27,7 @@ function Favorites() {
     }
 
     return unique
-  }, [user, categorizedMovies])
+  }, [favoriteIds, categorizedMovies])
 
   if (!user) {
     return (
@@ -42,6 +40,20 @@ function Favorites() {
           <Link to="/" className="primary-button">
             Log In
           </Link>
+        </section>
+        <Footerbar />
+      </>
+    )
+  }
+
+  if (!loaded) {
+    return (
+      <>
+        <Navbar activePage="favorites" />
+        <section className="page-panel">
+          <p className="eyebrow">Your list</p>
+          <h1>Favorites</h1>
+          <p>Loading your list…</p>
         </section>
         <Footerbar />
       </>

@@ -1,64 +1,50 @@
-const FAVORITES_KEY = 'redstream_favorites'
+// DB-backed favorites - talks to backend/api/favorites.php (the `favorites`
+// table), replacing the old localStorage-only version. All functions here
+// are async since they now involve a network request.
 
-function getStorageKey(userId) {
-  return `${FAVORITES_KEY}_${userId}`
-}
+const API_BASE = 'http://localhost/backend/api'
 
-export function getFavoriteIds(userId) {
+export async function fetchFavoriteIds(userId) {
   if (!userId) return []
 
-  const raw = localStorage.getItem(getStorageKey(userId))
-  if (!raw) return []
-
   try {
-    const parsed = JSON.parse(raw)
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
+    const response = await fetch(`${API_BASE}/favorites.php?userId=${encodeURIComponent(userId)}`)
+    const data = await response.json()
+    return Array.isArray(data.movieIds) ? data.movieIds : []
+  } catch (error) {
+    console.error('Error fetching favorites', error)
     return []
   }
 }
 
-export function getFavoritesCount(userId) {
-  return getFavoriteIds(userId).length
+export async function addFavorite(userId, movieId) {
+  if (!userId || !movieId) return
+  await fetch(`${API_BASE}/favorites.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId, movieId }),
+  })
 }
 
-function saveFavoriteIds(userId, ids) {
-  localStorage.setItem(getStorageKey(userId), JSON.stringify(ids))
+export async function removeFavorite(userId, movieId) {
+  if (!userId || !movieId) return
+  await fetch(
+    `${API_BASE}/favorites.php?userId=${encodeURIComponent(userId)}&movieId=${encodeURIComponent(movieId)}`,
+    { method: 'DELETE' }
+  )
 }
 
-export function isFavorite(userId, movieId) {
-  if (!userId || !movieId) return false
-  return getFavoriteIds(userId).includes(movieId)
-}
+// wasFavorite = whether it was favorited *before* this call (the caller
+// already knows this from the favoriteIds list it's tracking, so we don't
+// need a separate round trip just to check).
+export async function toggleFavorite(userId, movieId, wasFavorite) {
+  if (!userId || !movieId) return wasFavorite
 
-export function addFavorite(userId, movieId) {
-  if (!userId || !movieId) return []
-
-  const ids = getFavoriteIds(userId)
-  if (!ids.includes(movieId)) {
-    const updated = [...ids, movieId]
-    saveFavoriteIds(userId, updated)
-    return updated
-  }
-  return ids
-}
-
-export function removeFavorite(userId, movieId) {
-  if (!userId || !movieId) return []
-
-  const updated = getFavoriteIds(userId).filter((id) => id !== movieId)
-  saveFavoriteIds(userId, updated)
-  return updated
-}
-
-export function toggleFavorite(userId, movieId) {
-  if (!userId || !movieId) return false
-
-  if (isFavorite(userId, movieId)) {
-    removeFavorite(userId, movieId)
+  if (wasFavorite) {
+    await removeFavorite(userId, movieId)
     return false
   }
 
-  addFavorite(userId, movieId)
+  await addFavorite(userId, movieId)
   return true
 }

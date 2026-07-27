@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom'
 import { Navbar } from '../components/Navbar'
 import { useHomeMovies } from '../hooks/useHomeMovies'
-import { isFavorite, toggleFavorite } from '../data/favorites'
+import { useFavoriteIds } from '../hooks/useFavoriteIds'
+import { toggleFavorite } from '../data/favorites'
 import playerVideo from '../data/type-vid.mp4'
 import './Player.css'
 import Footerbar from '../components/Footerbar'
@@ -22,7 +23,9 @@ import Footerbar from '../components/Footerbar'
 function Player() {
   const { id } = useParams();
   const user = JSON.parse(localStorage.getItem("user"));
-  const [isFav, setIsFav] = useState(() => isFavorite(user?.id, id))
+  const { favoriteIds, setFavoriteIds } = useFavoriteIds(user?.id)
+  const isFav = favoriteIds.includes(id)
+  const [favBusy, setFavBusy] = useState(false)
   const categorizedMovies = useHomeMovies()
 
   const movie = useMemo(
@@ -41,12 +44,18 @@ function Player() {
   // file linked yet (e.g. freshly TMDB-synced titles you haven't filled in).
   const videoSrc = movie.content?.fileUrl || playerVideo
 
-  const handleFavoriteClick = () => {
+  const handleFavoriteClick = async () => {
     if (!user) {
       alert('Please log in to save favorites.')
       return
     }
-    setIsFav(toggleFavorite(user.id, movie.id))
+
+    setFavBusy(true)
+    const nowFavorite = await toggleFavorite(user.id, movie.id, isFav)
+    setFavoriteIds((current) =>
+      nowFavorite ? [...current, movie.id] : current.filter((movieId) => movieId !== movie.id)
+    )
+    setFavBusy(false)
   }
 
   return (
@@ -131,6 +140,7 @@ function Player() {
                   type="button"
                   onClick={handleFavoriteClick}
                   aria-pressed={isFav}
+                  disabled={favBusy}
                 >
                   {isFav ? 'Remove from Favorites' : 'Add to Favorites'}
                 </button>
