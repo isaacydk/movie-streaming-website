@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Navbar } from '../components/Navbar'
-import { plans, updateUser } from '../data/mockUsers'
 import { getFavoritesCount } from '../data/favorites'
 import './Profile.css'
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const API_BASE = 'http://localhost/backend/api'
 
 function getInitials(name) {
   return name
@@ -18,12 +18,14 @@ function getInitials(name) {
 }
 
 function Profile() {
-  const user = JSON.parse(localStorage.getItem("user"));
+  // Kept in React state (not just read once from localStorage) so a
+  // successful save re-renders the page immediately with the new details.
+  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user')))
   const [isEditing, setIsEditing] = useState(false)
-  const [editForm, setEditForm] = useState({ name: '', email: '', age: '' })
+  const [editForm, setEditForm] = useState({ name: '', email: '', phone: '' })
   const [editError, setEditError] = useState('')
+  const [saving, setSaving] = useState(false)
 
-  const plan = user ? plans.find((entry) => entry.id === user.plan) : null
   const favoritesCount = user ? getFavoritesCount(user.id) : 0
 
   const startEditing = () => {
@@ -46,24 +48,54 @@ function Profile() {
     setEditForm((current) => ({ ...current, [name]: value }))
   }
 
-  const handleSave = (event) => {
+  const handleSave = async (event) => {
     event.preventDefault()
     setEditError('')
+
+    if (!editForm.name.trim()) {
+      setEditError('Name is required.')
+      return
+    }
 
     if (!emailPattern.test(editForm.email.trim().toLowerCase())) {
       setEditError('Enter a valid email address.')
       return
     }
 
-    const result = updateUser(user.id, editForm)
-
-    if (result.error) {
-      setEditError(result.error)
+    if (!editForm.phone.trim()) {
+      setEditError('Phone number is required.')
       return
     }
 
-    // setUser(result.user)
-    setIsEditing(false)
+    setSaving(true)
+
+    try {
+      const response = await fetch(`${API_BASE}/profile.php`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: user.id,
+          full_name: editForm.name.trim(),
+          email: editForm.email.trim().toLowerCase(),
+          phone: editForm.phone.trim(),
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok || data.error) {
+        setEditError(data.error || 'Something went wrong. Please try again.')
+        return
+      }
+
+      localStorage.setItem('user', JSON.stringify(data.user))
+      setUser(data.user)
+      setIsEditing(false)
+    } catch {
+      setEditError('Could not reach the server. Please try again.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -107,7 +139,9 @@ function Profile() {
                 ) : (
                   <>
                     <h1>{user.full_name}</h1>
-                    {plan ? <span className="profile-plan-badge">{plan.name}</span> : null}
+                    <span className="profile-plan-badge">
+                      {user.subscription_active ? 'Subscription Active' : 'Subscription Expired'}
+                    </span>
                   </>
                 )}
               </div>
@@ -124,21 +158,20 @@ function Profile() {
                   <input name="email" type="email" value={editForm.email} onChange={handleEditChange} />
                 </label>
                 <label>
-                  Age
-                  <input
-                    name="age"
-                    type="number"
-                    min="13"
-                    value={editForm.age}
-                    onChange={handleEditChange}
-                  />
+                  Phone
+                  <input name="phone" type="tel" value={editForm.phone} onChange={handleEditChange} />
                 </label>
                 {editError ? <p className="profile-edit-error">{editError}</p> : null}
                 <div className="profile-edit-actions">
-                  <button className="primary-button" type="submit">
-                    Save Changes
+                  <button className="primary-button" type="submit" disabled={saving}>
+                    {saving ? 'Saving…' : 'Save Changes'}
                   </button>
-                  <button className="ghost-button" type="button" onClick={cancelEditing}>
+                  <button
+                    className="ghost-button"
+                    type="button"
+                    onClick={cancelEditing}
+                    disabled={saving}
+                  >
                     Cancel
                   </button>
                 </div>
@@ -173,25 +206,19 @@ function Profile() {
 
                 <article className="profile-payment-status">
                   <span className="profile-payment-icon" aria-hidden="true">
-                    ✓
+                    {user.subscription_active ? '✓' : '!'}
                   </span>
                   <div>
-                    <h2>Payment up to date</h2>
-                    <p>Your Telebirr subscription is active and paid through the next billing cycle.</p>
+                    <h2>{user.subscription_active ? 'Payment up to date' : 'Subscription expired'}</h2>
+                    <p>
+                      {user.subscription_active
+                        ? `Your subscription is active, with ${user.days_remaining} day${
+                            user.days_remaining === 1 ? '' : 's'
+                          } remaining in this billing cycle.`
+                        : 'Your subscription has expired. Renew to keep watching.'}
+                    </p>
                   </div>
                 </article>
-
-                {plan ? (
-                  <article className="profile-plan-card">
-                    <p className="profile-plan-kicker">Membership</p>
-                    <h2>{plan.name} Plan</h2>
-                    <p className="profile-plan-price">{plan.price}</p>
-                    <ul className="profile-plan-features">
-                      <li>{plan.quality}</li>
-                      <li>{plan.devices}</li>
-                    </ul>
-                  </article>
-                ) : null}
               </div>
             )}
           </>

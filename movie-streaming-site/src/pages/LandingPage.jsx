@@ -1,13 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { detailMovieRows } from '../data/DetailMovieRows'
 import { useHomeMovies } from '../hooks/useHomeMovies'
 import './LandingPage.css'
-
-// Static fallback data, used only until the database has synced/admin-added
-// movies to show (e.g. right after a fresh install, before the first TMDB
-// sync or admin entry has happened).
-const fallbackMovies = detailMovieRows.flatMap((row) => row.movies)
 
 const reasons = [
   {
@@ -51,10 +45,10 @@ export function LandingPage() {
   const navigate = useNavigate()
   const categorizedMovies = useHomeMovies()
 
-  const allMovies = useMemo(() => {
-    const flattened = categorizedMovies.flatMap((row) => row.movies)
-    return flattened.length > 0 ? flattened : fallbackMovies
-  }, [categorizedMovies])
+  const allMovies = useMemo(
+    () => categorizedMovies.flatMap((row) => row.movies),
+    [categorizedMovies]
+  )
 
   const heroMovies = allMovies.slice(0, 18)
   const trendingMovies = allMovies.slice(0, 5)

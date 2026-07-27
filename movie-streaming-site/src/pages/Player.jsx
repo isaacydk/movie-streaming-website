@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom'
 import { Navbar } from '../components/Navbar'
-import { detailMovieRows } from '../data/DetailMovieRows'
+import { useHomeMovies } from '../hooks/useHomeMovies'
 import { isFavorite, toggleFavorite } from '../data/favorites'
 import playerVideo from '../data/type-vid.mp4'
 import './Player.css'
@@ -23,28 +23,18 @@ function Player() {
   const { id } = useParams();
   const user = JSON.parse(localStorage.getItem("user"));
   const [isFav, setIsFav] = useState(() => isFavorite(user?.id, id))
+  const categorizedMovies = useHomeMovies()
 
-  const movie = useMemo(() => {
-    let data = null
+  const movie = useMemo(
+    () => categorizedMovies.flatMap((row) => row.movies).find((m) => m.id === id) || null,
+    [categorizedMovies, id]
+  )
 
-    const cachedHomeMovies = localStorage.getItem('home-movies-cache')
-    if (cachedHomeMovies) {
-      try {
-        const parsed = JSON.parse(cachedHomeMovies)
-        data = parsed?.data
-      } catch (error) {
-        console.error('Invalid home movie cache', error)
-      }
-    }
-
-    if (!data) {
-      data = detailMovieRows
-    }
-
-    return data.flatMap((row) => row.movies).find((m) => m.id === id) || null
-  }, [id])
-
-  if (!movie) return <p>Movie not found</p>;
+  if (!movie) {
+    // categorizedMovies starts empty while useHomeMovies is still fetching,
+    // so an empty list doesn't necessarily mean the movie doesn't exist.
+    return <p>{categorizedMovies.length > 0 ? 'Movie not found' : 'Loading movie…'}</p>;
+  }
 
   // Prefer the real file attached in the Admin panel / movie_content table.
   // Falls back to the local placeholder clip for movies that don't have a

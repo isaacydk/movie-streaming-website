@@ -1,58 +1,35 @@
-import { useState } from 'react'
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import Footerbar from '../components/Footerbar'
 import { Navbar } from '../components/Navbar'
 import { MovieRow } from '../components/MovieRow'
 import { getFavoriteIds } from '../data/favorites'
-import { detailMovieRows } from '../data/DetailMovieRows'
+import { useHomeMovies } from '../hooks/useHomeMovies'
 
-const CACHE_KEY = 'home-movies-cache'
-
-// Same movie source Player.jsx uses: prefer the cached API movies, and
-// fall back to the local mock data if nothing has been cached yet.
-function getAllMovies() {
-  let rows = null
-
-  const cached = localStorage.getItem(CACHE_KEY)
-  if (cached) {
-    try {
-      rows = JSON.parse(cached)?.data
-    } catch {
-      rows = null
-    }
-  }
-
-  if (!rows || !rows.length) {
-    rows = detailMovieRows
-  }
+function Favorites() {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const categorizedMovies = useHomeMovies()
 
   // A movie can appear in more than one homepage row (e.g. a title can be
   // both "Popular" and "Trending" at the same time). Flattening all rows
   // together would otherwise produce duplicate entries for that movie -
-  // one from its first row, one from its last - which is what caused a
-  // favorited movie to render twice in the list. Dedupe by id, keeping
-  // the first occurrence.
-  const seen = new Set()
-  const uniqueMovies = []
-
-  for (const movie of rows.flatMap((row) => row.movies)) {
-    if (!seen.has(movie.id)) {
-      seen.add(movie.id)
-      uniqueMovies.push(movie)
-    }
-  }
-
-  return uniqueMovies
-}
-
-function Favorites() {
-  const user = JSON.parse(localStorage.getItem("user"));
-  const [favoriteMovies] = useState(() => {
+  // one from its first row, one from its last - so we dedupe by id.
+  const favoriteMovies = useMemo(() => {
     if (!user) return []
 
     const favoriteIds = getFavoriteIds(user.id)
-    return getAllMovies().filter((movie) => favoriteIds.includes(movie.id))
-  })
+    const seen = new Set()
+    const unique = []
+
+    for (const movie of categorizedMovies.flatMap((row) => row.movies)) {
+      if (favoriteIds.includes(movie.id) && !seen.has(movie.id)) {
+        seen.add(movie.id)
+        unique.push(movie)
+      }
+    }
+
+    return unique
+  }, [user, categorizedMovies])
 
   if (!user) {
     return (
