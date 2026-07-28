@@ -158,7 +158,7 @@ export function LandingPage() {
     }
     // Send signup data to backend PHP endpoint
     try {
-      const response = await fetch("http://localhost/backend/api/signup.php", {
+      const response = await fetch("http://192.168.1.8/backend/api/signup.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -183,7 +183,7 @@ export function LandingPage() {
     }
 
     try {
-      const response = await fetch("http://localhost/backend/api/login.php", {
+      const response = await fetch("http://192.168.1.8/backend/api/login.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -232,7 +232,7 @@ export function LandingPage() {
     }
 
     try {
-      const response = await fetch("http://localhost/backend/api/login.php", {
+      const response = await fetch("http://192.168.1.8/backend/api/login.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

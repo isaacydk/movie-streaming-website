@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { HOME_MOVIES_CACHE_KEY } from '../hooks/useHomeMovies'
 import './Admin.css'
 
-const API_BASE = 'http://localhost/backend/api/admin'
+const API_BASE = 'http://192.168.1.8/backend/api/admin'
 
 // Home.jsx / LandingPage.jsx cache movies.php's response in localStorage for
 // a few minutes (see useHomeMovies.js) so they're not hitting the DB on

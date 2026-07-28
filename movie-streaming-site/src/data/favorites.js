@@ -2,7 +2,7 @@
 // table), replacing the old localStorage-only version. All functions here
 // are async since they now involve a network request.
 
-const API_BASE = 'http://localhost/backend/api'
+const API_BASE = 'http://192.168.1.8/backend/api'
 
 export async function fetchFavoriteIds(userId) {
   if (!userId) return []

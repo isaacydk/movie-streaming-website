@@ -24,7 +24,7 @@ function Contact() {
     setError('')
 
     try {
-      const response = await fetch("http://localhost/backend/api/contact.php", {
+      const response = await fetch("http://192.168.1.8/backend/api/contact.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

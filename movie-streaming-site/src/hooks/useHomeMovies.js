@@ -50,7 +50,7 @@ export function useHomeMovies() {
       // fall through to a fresh fetch
     }
 
-    fetch('http://localhost/backend/api/movies.php')
+    fetch('http://192.168.1.8/backend/api/movies.php')
       .then((response) => response.json())
       .then((data) => {
         setMovies(data)

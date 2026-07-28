@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, Routes } from 'react-router-dom'
 import { Navbar } from '../components/Navbar'
 import { useFavoriteIds } from '../hooks/useFavoriteIds'
 import './Profile.css'
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const API_BASE = 'http://localhost/backend/api'
+const API_BASE = 'http://192.168.1.8/backend/api'
 
 function getInitials(name) {
   return name
