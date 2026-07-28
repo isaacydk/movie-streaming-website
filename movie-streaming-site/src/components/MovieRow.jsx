@@ -5,13 +5,13 @@ export function MovieRow({ title, movies }) {
     return null
   }
 
-  const headingId = `${title.toLowerCase().replace(/\s+/g, '-')}-heading`
+  const sectionId = title.toLowerCase().replace(/\s+/g, '-')
+  const headingId = `${sectionId}-heading`
 
   return (
-    <section className="movie-row" aria-labelledby={headingId}>
+    <section id={sectionId} className="movie-row" aria-labelledby={headingId}>
       <div className="row-header">
         <h2 id={headingId}>{title}</h2>
-        <button type="button">View All</button>
       </div>
       <div className="movie-scroller">
         {movies.map((movie) => (

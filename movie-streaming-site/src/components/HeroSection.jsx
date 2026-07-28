@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom"
+
 export function HeroSection() {
   return (
     <section className="hero-section">
@@ -8,15 +10,19 @@ export function HeroSection() {
         in a Netflix-inspired streaming dashboard.
       </p>
       <div className="hero-actions">
-        <button type="button" className="primary-button">
+        <button
+          type="button"
+          className="primary-button"
+          onClick={() =>
+            document.getElementById("popular")?.scrollIntoView({ behavior: "smooth" })
+          }
+        >
           Start Watching
         </button>
-        <button type="button" className="ghost-button">
+        <Link to="/favorites" className="ghost-button">
           View Favorites
-        </button>
+        </Link>
       </div>
     </section>
   )
 }
-
-
