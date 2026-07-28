@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useLocation } from 'react-router-dom'
 import { Navbar } from '../components/Navbar'
 import { useHomeMovies } from '../hooks/useHomeMovies'
 import { useFavoriteIds } from '../hooks/useFavoriteIds'
@@ -22,6 +22,7 @@ import Footerbar from '../components/Footerbar'
 
 function Player() {
   const { id } = useParams();
+  const location = useLocation()
   const user = JSON.parse(localStorage.getItem("user"));
   const { favoriteIds, setFavoriteIds } = useFavoriteIds(user?.id)
   const isFav = favoriteIds.includes(id)
@@ -29,8 +30,8 @@ function Player() {
   const categorizedMovies = useHomeMovies()
 
   const movie = useMemo(
-    () => categorizedMovies.flatMap((row) => row.movies).find((m) => m.id === id) || null,
-    [categorizedMovies, id]
+    () => location.state?.movie || categorizedMovies.flatMap((row) => row.movies).find((m) => String(m.id) === String(id)) || null,
+    [categorizedMovies, id, location.state]
   )
 
   if (!movie) {
