@@ -37,11 +37,9 @@ export function LandingPage() {
   const [signupData, setSignupData] = useState(initialSignupData)
   const [signInData, setSignInData] = useState(initialSignInData)
   const [telebirrPhone, setTelebirrPhone] = useState('')
-  const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
   const resetFeedback = () => {
-    setMessage('')
     setError('')
   }
 
@@ -77,8 +75,6 @@ export function LandingPage() {
     setSignupData({ ...initialSignupData, email: normalizedEmail })
     setFlow('details')
   }
-
-
   const updateSignupData = (event) => {
     const { name, value } = event.target
     setSignupData((currentData) => ({ ...currentData, [name]: value }))
@@ -97,8 +93,6 @@ export function LandingPage() {
       setError('Enter your full name.')
       return
     }
-
-
     if (!emailPattern.test(signupData.email.trim().toLowerCase())) {
       setError('Enter a valid email address.')
       return
@@ -126,8 +120,6 @@ export function LandingPage() {
       setError('Enter a valid Telebirr phone number, like 0912345678 or +251912345678.')
       return
     }
-
-
     const userData = {
       name: signupData.name,
       email: signupData.email,
@@ -192,8 +184,6 @@ export function LandingPage() {
       setError("Server error");
     }
 
-
-    navigate('/home')
   }
 
   const handleSignIn = async (event) => {
@@ -242,10 +232,6 @@ export function LandingPage() {
     }
 
   }
-
-
-
-
   return (
     <main className="landing-page">
       <section className="landing-hero" aria-labelledby="landing-title">
@@ -412,7 +398,6 @@ export function LandingPage() {
               <form className="flow-form" onSubmit={handleSignIn}>
                 <p className="flow-kicker">Welcome back</p>
                 <h2 id="flow-title">Sign in to RedStream</h2>
-                {message ? <p className="flow-message">{message}</p> : null}
                 <label>
                   Email
                   <input name="email" type="email" value={signInData.email} onChange={updateSignInData} />

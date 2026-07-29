@@ -13,7 +13,7 @@ function getInitials(name) {
 }
 
 export function Navbar({ activePage }) {
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(localStorage.getItem('user'))
   const initials = user ? getInitials(user.full_name) : '?'
 
   return (
@@ -22,8 +22,6 @@ export function Navbar({ activePage }) {
         <span className="brand-mark">M</span>
         <span>RedStream</span>
       </Link>
-
-      {/* <SearchBar value={searchQuery} onChange={onSearchChange} /> */}
 
       <SearchBar />
 
@@ -42,7 +40,6 @@ export function Navbar({ activePage }) {
           {initials}
         </Link>
       </div>
-
     </header>
   )
 }

@@ -9,7 +9,7 @@ export function Home() {
 
   return (
     <>
-      <Navbar activePage={"home"} />
+      <Navbar activePage="home" />
       <HeroSection />
 
       {movies.length > 0 ? (

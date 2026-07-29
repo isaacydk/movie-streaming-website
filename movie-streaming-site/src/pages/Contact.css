@@ -1,62 +1,21 @@
-/* ===== RedStream shared styles ===== */
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  padding: 40px 20px;
-  background-color: #0d0d0d;
-  color: #e6e6e6;
-  font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-}
-
-.page {
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-h1 {
-  font-size: 28px;
-  margin-bottom: 6px;
-}
-
-.subtitle {
-  color: #9a9a9a;
-  font-size: 14px;
-  margin-bottom: 30px;
-}
-
-.card {
+.contact-card {
   width: min(100%, 560px);
   margin: 0 auto;
-  display: block;
   background-color: #141414;
   border: 1px solid #2a2a2a;
   border-radius: 12px;
   padding: 24px;
 }
 
-.card-label {
-  font-size: 12px;
-  font-weight: bold;
-  letter-spacing: 1px;
-  color: #9a9a9a;
-  margin-bottom: 20px;
-  text-transform: uppercase;
-}
-
-label {
+.contact-card label {
   display: block;
   font-size: 13px;
   color: #b5b5b5;
   margin-bottom: 6px;
 }
 
-input[type="text"],
-input[type="email"],
-textarea {
+.contact-card input,
+.contact-card textarea {
   width: 100%;
   background-color: #0d0d0d;
   border: 1px solid #333;
@@ -68,18 +27,18 @@ textarea {
   font-family: inherit;
 }
 
-input:focus,
-textarea:focus {
+.contact-card input:focus,
+.contact-card textarea:focus {
   outline: none;
   border-color: #d9534f;
 }
 
-textarea {
+.contact-card textarea {
   min-height: 90px;
   resize: vertical;
 }
 
-button.send-btn {
+.send-btn {
   width: 100%;
   background-color: #d9534f;
   color: #ffffff;
@@ -91,13 +50,11 @@ button.send-btn {
   cursor: pointer;
 }
 
-button.send-btn:hover {
+.send-btn:hover {
   background-color: #c9302c;
 }
 
-/* Confirmation banner shown after sending a message */
-.confirmation {
-  display: none;
+.contact-confirmation {
   margin-top: 16px;
   padding: 12px;
   background-color: #1c3a24;
@@ -108,95 +65,8 @@ button.send-btn:hover {
   text-align: center;
 }
 
-/* ===== Admin inbox ===== */
-.inbox-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.inbox-item {
-  background-color: #1a1a1a;
-  border: 1px solid #2a2a2a;
-  border-radius: 8px;
-  padding: 14px 16px;
-  cursor: pointer;
-}
-
-.inbox-item:hover {
-  border-color: #d9534f;
-}
-
-.inbox-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-}
-
-.inbox-name {
-  font-weight: bold;
-  font-size: 14px;
-}
-
-.inbox-time {
-  font-size: 12px;
-  color: #8a8a8a;
-  white-space: nowrap;
-}
-
-.inbox-preview {
-  font-size: 13px;
-  color: #b5b5b5;
-  margin-top: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.inbox-email {
-  font-size: 12px;
-  color: #7a7a7a;
-  margin-top: 4px;
-}
-
-.empty-inbox {
-  color: #7a7a7a;
-  font-size: 14px;
-  text-align: center;
-  padding: 30px 0;
-}
-
-.top-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.small-link {
-  color: #9a9a9a;
-  font-size: 13px;
-  text-decoration: none;
-  border: 1px solid #333;
-  padding: 6px 12px;
-  border-radius: 6px;
-}
-
-.small-link:hover {
-  border-color: #d9534f;
-  color: #fff;
-}
-
-.clear-btn {
-  background: none;
-  border: 1px solid #4a2222;
-  color: #d9534f;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  cursor: pointer;
-  margin-top: 16px;
-}
-
-.clear-btn:hover {
-  background-color: #2a1414;
+.contact-confirmation-error {
+  color: #d19e9e;
+  background: #3a1c1c;
+  border-color: #6b2e2e;
 }

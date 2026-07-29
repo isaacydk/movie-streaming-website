@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom'
 import './Footerbar.css'
 
 function Footerbar() {
@@ -12,7 +12,7 @@ function Footerbar() {
         <p>&copy; {new Date().getFullYear()} Movie Streaming. All rights reserved.</p>
       </div>
     </footer>
-  );
+  )
 }
 
-export default Footerbar;
+export default Footerbar

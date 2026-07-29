@@ -60,7 +60,7 @@ function Contact() {
 
         <p>or Just fill the form</p>
 
-        <div className="card">
+        <div className="contact-card">
           <form id="contactForm" onSubmit={handleSubmit}>
             <label htmlFor="name">Name</label>
             <input type="text" id="name" value={form.name} onChange={handleChange} required />
@@ -77,13 +77,13 @@ function Contact() {
           </form>
 
           {status === 'sent' ? (
-            <div className="confirmation" style={{ display: 'block' }}>
+            <div className="contact-confirmation">
               ✅ Your message was sent! The admin team will see it in their inbox.
             </div>
           ) : null}
 
           {status === 'error' ? (
-            <div className="confirmation" style={{ display: 'block', background: '#3a1c1c', borderColor: '#6b2e2e', color: '#d19e9e' }}>
+            <div className="contact-confirmation contact-confirmation-error">
               ⚠️ {error || 'Could not send your message. Please try again.'}
             </div>
           ) : null}

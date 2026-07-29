@@ -491,22 +491,11 @@
   text-transform: uppercase;
 }
 
-.flow-copy,
-.flow-message {
+.flow-copy {
   margin: 14px 0 0;
   color: rgba(255, 255, 255, 0.74);
   line-height: 1.5;
 }
-
-.flow-message {
-  padding: 12px 14px;
-  color: #fff;
-  background: rgba(229, 9, 20, 0.18);
-  border: 1px solid rgba(229, 9, 20, 0.36);
-  border-radius: 6px;
-}
-
-
 
 .plan-grid {
   display: grid;
