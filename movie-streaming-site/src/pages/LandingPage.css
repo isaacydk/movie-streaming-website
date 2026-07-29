@@ -243,8 +243,6 @@
 .landing-content {
   position: relative;
   z-index: 3;
-  display: grid;
-  gap: 64px;
   padding: 20px clamp(20px, 10vw, 160px) 80px;
   background: #000;
 }
