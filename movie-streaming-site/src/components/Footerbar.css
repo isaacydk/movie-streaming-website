@@ -1,8 +1,8 @@
 .footerbar {
   width: 100%;
   padding: 1.5rem 2rem;
-  background: #111;
-  color: #fff;
+  background: var(--soft-background);
+  color: var(--text-color);
 }
 
 .footerbar__bottom {
@@ -11,22 +11,22 @@
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-top: 1px solid var(--border-color);
   padding-top: 1rem;
 }
 
 .footerbar__contact-btn {
   display: inline-block;
   padding: 0.75rem 1.25rem;
-  background: #e50914;
-  color: #fff;
+  background: var(--brand-red);
+  color: white;
   border-radius: 6px;
   font-weight: 600;
   transition: background 0.2s ease;
 }
 
 .footerbar__contact-btn:hover {
-  background: #b20710;
+  background: var(--dark-red);
 }
 
 .footerbar__bottom p {

@@ -1,8 +1,8 @@
 .contact-card {
   width: min(100%, 560px);
   margin: 0 auto;
-  background-color: #141414;
-  border: 1px solid #2a2a2a;
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 24px;
 }
@@ -10,18 +10,18 @@
 .contact-card label {
   display: block;
   font-size: 13px;
-  color: #b5b5b5;
+  color: var(--muted-text);
   margin-bottom: 6px;
 }
 
 .contact-card input,
 .contact-card textarea {
   width: 100%;
-  background-color: #0d0d0d;
-  border: 1px solid #333;
-  border-radius: 8px;
+  background-color: var(--soft-background);
+  border: 1px solid var(--border-color);
+  border-radius: var(--corner-radius);
   padding: 12px;
-  color: #f0f0f0;
+  color: var(--text-color);
   font-size: 14px;
   margin-bottom: 18px;
   font-family: inherit;
@@ -30,7 +30,7 @@
 .contact-card input:focus,
 .contact-card textarea:focus {
   outline: none;
-  border-color: #d9534f;
+  border-color: var(--brand-red);
 }
 
 .contact-card textarea {
@@ -40,10 +40,10 @@
 
 .send-btn {
   width: 100%;
-  background-color: #d9534f;
-  color: #ffffff;
+  background-color: var(--brand-red);
+  color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--corner-radius);
   padding: 14px;
   font-size: 15px;
   font-weight: bold;
@@ -51,7 +51,7 @@
 }
 
 .send-btn:hover {
-  background-color: #c9302c;
+  background-color: var(--dark-red);
 }
 
 .contact-confirmation {
@@ -60,7 +60,7 @@
   background-color: #1c3a24;
   border: 1px solid #2e6b3e;
   color: #8fd19e;
-  border-radius: 8px;
+  border-radius: var(--corner-radius);
   font-size: 14px;
   text-align: center;
 }

@@ -39,7 +39,7 @@ function Favorites() {
         <p className="eyebrow">Your list</p>
         <h1>Favorites</h1>
         <p>Log in to save movies and build your personal watchlist.</p>
-        <Link to="/" className="primary-button">
+        <Link to="/" className="watch-button">
           Log In
         </Link>
       </section>
@@ -65,7 +65,7 @@ function Favorites() {
           Saved movies will appear here. Open any title and tap
           &ldquo;Add to Favorites&rdquo; to add it to your list.
         </p>
-        <Link to="/home" className="primary-button">
+        <Link to="/home" className="watch-button">
           Browse Movies
         </Link>
       </section>

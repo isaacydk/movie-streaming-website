@@ -76,12 +76,15 @@ function useAdminUser() {
 }
 
 async function callApi(path, adminId, options = {}) {
-  const response = await fetch(`${API_BASE}/${path}`, {
+  const requestUrl = API_BASE + '/' + path
+  const extraHeaders = options.headers || {}
+
+  const response = await fetch(requestUrl, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
       'X-Admin-Id': adminId,
-      ...(options.headers || {}),
+      ...extraHeaders,
     },
   })
 
@@ -97,15 +100,15 @@ async function callApi(path, adminId, options = {}) {
       // 404 page, etc). Surface that clearly instead of pretending
       // nothing came back - that's what was making the lists look
       // empty with no explanation.
-      throw new Error(
-        `Server returned an unreadable response (HTTP ${response.status}) from ${path}. ` +
-        `Open the Network tab or the PHP error log to see the real error. Raw response: ${raw.slice(0, 200)}`
-      )
+      const errorMessage =
+        'Server returned an unreadable response (HTTP ' + response.status + ') from ' + path + '. ' +
+        'Open the Network tab or the PHP error log to see the real error. Raw response: ' + raw.slice(0, 200)
+      throw new Error(errorMessage)
     }
   }
 
   if (!response.ok || data.error) {
-    throw new Error(data.error || `Request failed (HTTP ${response.status}) from ${path}`)
+    throw new Error(data.error || 'Request failed (HTTP ' + response.status + ') from ' + path)
   }
 
   return data
@@ -134,14 +137,14 @@ export default function Admin() {
   }
 
   return (
-    <div className="admin-shell">
-      <header className="admin-topbar">
-        <Link to="/home" className="admin-brand">
-          <span className="brand-mark">M</span>
+    <div className="admin-page">
+      <header className="admin-header">
+        <Link to="/home" className="admin-logo">
+          <span className="logo-icon">M</span>
           <span>RedStream Admin</span>
         </Link>
 
-        <nav className="admin-tabs">
+        <nav className="admin-menu">
           <button
             className={activeTab === 'movies' ? 'active' : ''}
             onClick={() => setActiveTab('movies')}
@@ -162,12 +165,12 @@ export default function Admin() {
           </button>
         </nav>
 
-        <Link to="/home" className="admin-exit">
+        <Link to="/home" className="logout-link">
           ← Back to site
         </Link>
       </header>
 
-      <main className="admin-content">
+      <main className="admin-main">
         {activeTab === 'movies' && <MoviesPanel adminId={user.id} />}
         {activeTab === 'users' && <UsersPanel adminId={user.id} />}
         {activeTab === 'reports' && <ReportsPanel adminId={user.id} />}
@@ -178,12 +181,12 @@ export default function Admin() {
 
 function AdminGate({ title, message }) {
   return (
-    <div className="admin-gate">
-      <div className="admin-gate-card">
-        <p className="eyebrow">Access denied</p>
+    <div className="login-screen">
+      <div className="login-box">
+        <p className="small-title">Access denied</p>
         <h1>{title}</h1>
         <p>{message}</p>
-        <Link className="primary-button" to="/home">
+        <Link className="watch-button" to="/home">
           Go to Home
         </Link>
       </div>
@@ -228,12 +231,16 @@ function MoviesPanel({ adminId }) {
   }, [])
 
   const openEditForm = (movie) => {
+    const content = movie.content || {}
+    const ratingValue = movie.rating === null || movie.rating === undefined ? '' : movie.rating
+    const isActiveValue = content.isActive === null || content.isActive === undefined ? true : content.isActive
+
     setEditingId(movie.id)
     setForm({
       id: movie.id,
       title: movie.title || '',
       genre: movie.genre || '',
-      rating: movie.rating ?? '',
+      rating: ratingValue,
       poster: movie.poster || '',
       synopsis: movie.synopsis || '',
       director: movie.director || '',
@@ -243,10 +250,10 @@ function MoviesPanel({ adminId }) {
       maturity: movie.maturity || '',
       audio: movie.audio || '',
       subtitles: movie.subtitles || '',
-      fileUrl: movie.content?.fileUrl || '',
-      fileFormat: movie.content?.fileFormat || '',
-      resolution: movie.content?.resolution || '',
-      isActive: movie.content?.isActive ?? true,
+      fileUrl: content.fileUrl || '',
+      fileFormat: content.fileFormat || '',
+      resolution: content.resolution || '',
+      isActive: isActiveValue,
       categories: movie.categories || [],
     })
     setFormError('')
@@ -308,9 +315,12 @@ function MoviesPanel({ adminId }) {
   }
 
   const handleDelete = async (movie) => {
-    if (!confirm(`Delete "${movie.title}"? This can't be undone.`)) return
+    const confirmMessage = 'Delete "' + movie.title + '"? This can\'t be undone.'
+    if (!confirm(confirmMessage)) {
+      return
+    }
     try {
-      await callApi(`movies.php?id=${encodeURIComponent(movie.id)}`, adminId, { method: 'DELETE' })
+      await callApi('movies.php?id=' + encodeURIComponent(movie.id), adminId, { method: 'DELETE' })
       setMovies((current) => current.filter((m) => m.id !== movie.id))
       invalidateHomeMoviesCache()
     } catch (err) {
@@ -323,10 +333,18 @@ function MoviesPanel({ adminId }) {
     setSyncResult(null)
     try {
       const data = await callApi('sync-tmdb.php', adminId, { method: 'POST' })
-      setSyncResult({
-        ok: true,
-        text: `Synced ${data.moviesUpserted} movie${data.moviesUpserted === 1 ? '' : 's'} (${data.categoryLinksAdded} new category link${data.categoryLinksAdded === 1 ? '' : 's'}).${data.errors?.length ? ` ${data.errors.length} warning(s) - check backend/logs/sync.log.` : ''}`,
-      })
+
+      const movieWord = data.moviesUpserted === 1 ? 'movie' : 'movies'
+      const linkWord = data.categoryLinksAdded === 1 ? 'link' : 'links'
+      let syncText =
+        'Synced ' + data.moviesUpserted + ' ' + movieWord +
+        ' (' + data.categoryLinksAdded + ' new category ' + linkWord + ').'
+
+      if (data.errors && data.errors.length > 0) {
+        syncText = syncText + ' ' + data.errors.length + ' warning(s) - check backend/logs/sync.log.'
+      }
+
+      setSyncResult({ ok: true, text: syncText })
       await loadMovies()
       invalidateHomeMoviesCache()
     } catch (err) {
@@ -354,7 +372,7 @@ function MoviesPanel({ adminId }) {
     try {
       parsed = JSON.parse(importText)
     } catch (err) {
-      setImportResult({ successCount: 0, errors: [`Invalid JSON: ${err.message}`] })
+      setImportResult({ successCount: 0, errors: ['Invalid JSON: ' + err.message] })
       return
     }
 
@@ -369,9 +387,11 @@ function MoviesPanel({ adminId }) {
     const errors = []
 
     for (const movie of list) {
-      const label = movie?.title || movie?.id || 'Untitled entry'
+      const movieTitle = movie && movie.title
+      const movieId = movie && movie.id
+      const label = movieTitle || movieId || 'Untitled entry'
       try {
-        if (!movie?.title || !String(movie.title).trim()) {
+        if (!movieTitle || !String(movieTitle).trim()) {
           throw new Error('missing "title"')
         }
         await callApi('movies.php', adminId, {
@@ -380,7 +400,7 @@ function MoviesPanel({ adminId }) {
         })
         successCount++
       } catch (err) {
-        errors.push(`${label}: ${err.message}`)
+        errors.push(label + ': ' + err.message)
       }
     }
 
@@ -393,8 +413,8 @@ function MoviesPanel({ adminId }) {
   }
 
   return (
-    <section className="admin-panel">
-      <div className="admin-panel-header">
+    <section className="panel">
+      <div className="panel-header">
         <div>
           <h1>Movies</h1>
           <p>
@@ -403,29 +423,29 @@ function MoviesPanel({ adminId }) {
             background (see backend/scripts/sync_tmdb.php).
           </p>
         </div>
-        <div className="admin-row-actions">
-          <button className="ghost-button" onClick={handleSyncNow} disabled={syncBusy}>
+        <div className="row-buttons">
+          <button className="favorites-button" onClick={handleSyncNow} disabled={syncBusy}>
             {syncBusy ? 'Syncing…' : 'Sync TMDB Now'}
           </button>
-          <button className="primary-button" onClick={openImport}>
+          <button className="watch-button" onClick={openImport}>
             + Add Movies (Import JSON)
           </button>
         </div>
       </div>
 
       {syncResult ? (
-        <p className={syncResult.ok ? 'admin-loading' : 'admin-error'}>{syncResult.text}</p>
+        <p className={syncResult.ok ? 'loading-text' : 'error-text'}>{syncResult.text}</p>
       ) : null}
 
-      {error ? <p className="admin-error">{error}</p> : null}
+      {error ? <p className="error-text">{error}</p> : null}
 
       {loading ? (
-        <p className="admin-loading">Loading movies…</p>
+        <p className="loading-text">Loading movies…</p>
       ) : movies.length === 0 ? (
-        <div className="empty-state">No movies yet. Add your first title.</div>
+        <div className="empty-message">No movies yet. Add your first title.</div>
       ) : (
-        <div className="admin-table-wrap">
-          <table className="admin-table">
+        <div className="table-wrapper">
+          <table className="data-table">
             <thead>
               <tr>
                 <th></th>
@@ -440,62 +460,67 @@ function MoviesPanel({ adminId }) {
               </tr>
             </thead>
             <tbody>
-              {movies.map((movie) => (
-                <tr key={movie.id}>
-                  <td>
-                    <div className="admin-poster-thumb">
-                      {movie.poster ? <img src={movie.poster} alt="" /> : <span>—</span>}
-                    </div>
-                  </td>
-                  <td>
-                    <div className="admin-title-cell">{movie.title}</div>
-                    <div className="admin-subtle">{movie.id}</div>
-                  </td>
-                  <td>{movie.genre || '—'}</td>
-                  <td>{movie.releaseYear || '—'}</td>
-                  <td>{movie.rating ? Number(movie.rating).toFixed(1) : '—'}</td>
-                  <td>
-                    <span className={`admin-badge ${movie.source === 'tmdb' ? 'admin-badge-muted' : 'admin-badge-active'}`}>
-                      {movie.source === 'tmdb' ? 'TMDB' : 'Admin'}
-                    </span>
-                  </td>
-                  <td>
-                    {movie.categories?.length ? (
-                      <span className="admin-subtle">{movie.categories.join(', ')}</span>
-                    ) : (
-                      <span className="admin-badge admin-badge-danger">Not on Home</span>
-                    )}
-                  </td>
-                  <td>
-                    {movie.content?.fileUrl ? (
-                      <span className="admin-badge admin-badge-active">Linked</span>
-                    ) : (
-                      <span className="admin-badge admin-badge-muted">None</span>
-                    )}
-                  </td>
-                  <td>
-                    <div className="admin-row-actions">
-                      <button className="ghost-button" onClick={() => openEditForm(movie)}>
-                        Edit
-                      </button>
-                      <button className="admin-danger-button" onClick={() => handleDelete(movie)}>
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {movies.map((movie) => {
+                const sourceLabel = movie.source === 'tmdb' ? 'TMDB' : 'Admin'
+                const sourceBadgeClass = movie.source === 'tmdb' ? 'status-badge status-gray' : 'status-badge status-green'
+                const hasCategories = movie.categories && movie.categories.length > 0
+                const hasVideoFile = movie.content && movie.content.fileUrl
+
+                return (
+                  <tr key={movie.id}>
+                    <td>
+                      <div className="poster-thumbnail">
+                        {movie.poster ? <img src={movie.poster} alt="" /> : <span>—</span>}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="title-cell">{movie.title}</div>
+                      <div className="subtle-text">{movie.id}</div>
+                    </td>
+                    <td>{movie.genre || '—'}</td>
+                    <td>{movie.releaseYear || '—'}</td>
+                    <td>{movie.rating ? Number(movie.rating).toFixed(1) : '—'}</td>
+                    <td>
+                      <span className={sourceBadgeClass}>{sourceLabel}</span>
+                    </td>
+                    <td>
+                      {hasCategories ? (
+                        <span className="subtle-text">{movie.categories.join(', ')}</span>
+                      ) : (
+                        <span className="status-badge status-red">Not on Home</span>
+                      )}
+                    </td>
+                    <td>
+                      {hasVideoFile ? (
+                        <span className="status-badge status-green">Linked</span>
+                      ) : (
+                        <span className="status-badge status-gray">None</span>
+                      )}
+                    </td>
+                    <td>
+                      <div className="row-buttons">
+                        <button className="favorites-button" onClick={() => openEditForm(movie)}>
+                          Edit
+                        </button>
+                        <button className="delete-button" onClick={() => handleDelete(movie)}>
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
       )}
 
       {showForm ? (
-        <div className="admin-modal-backdrop" onClick={closeForm}>
-          <div className="admin-modal" onClick={(event) => event.stopPropagation()}>
+        <div className="modal-background" onClick={closeForm}>
+          <div className="modal-box" onClick={(event) => event.stopPropagation()}>
             <h2>Edit Movie</h2>
-            <form className="admin-form" onSubmit={handleSubmit}>
-              <div className="admin-form-grid">
+            <form className="modal-form" onSubmit={handleSubmit}>
+              <div className="form-grid">
                 <label>
                   Title *
                   <input name="title" value={form.title} onChange={handleChange} required />
@@ -547,11 +572,11 @@ function MoviesPanel({ adminId }) {
                   Poster URL
                   <input name="poster" value={form.poster} onChange={handleChange} />
                 </label>
-                <label className="admin-span-2">
+                <label className="span-two">
                   Director(s)
                   <input name="director" value={form.director} onChange={handleChange} />
                 </label>
-                <label className="admin-span-2">
+                <label className="span-two">
                   Cast
                   <input name="cast" value={form.cast} onChange={handleChange} />
                 </label>
@@ -563,20 +588,20 @@ function MoviesPanel({ adminId }) {
                   Subtitles
                   <input name="subtitles" value={form.subtitles} onChange={handleChange} />
                 </label>
-                <label className="admin-span-2">
+                <label className="span-two">
                   Synopsis
                   <textarea name="synopsis" value={form.synopsis} onChange={handleChange} rows={3} />
                 </label>
               </div>
 
-              <hr className="admin-divider" />
-              <p className="admin-subheading">
+              <hr className="divider-line" />
+              <p className="section-subheading">
                 Home page categories
-                <span className="admin-subtle"> — a movie only shows up on Home if it's in at least one of these.</span>
+                <span className="subtle-text"> — a movie only shows up on Home if it's in at least one of these.</span>
               </p>
-              <div className="admin-category-group">
+              <div className="category-group">
                 {MOVIE_CATEGORIES.map((category) => (
-                  <label key={category} className="admin-checkbox-label">
+                  <label key={category} className="checkbox-label">
                     <input
                       type="checkbox"
                       checked={form.categories.includes(category)}
@@ -587,10 +612,10 @@ function MoviesPanel({ adminId }) {
                 ))}
               </div>
 
-              <hr className="admin-divider" />
-              <p className="admin-subheading">Video file (optional)</p>
-              <div className="admin-form-grid">
-                <label className="admin-span-2">
+              <hr className="divider-line" />
+              <p className="section-subheading">Video file (optional)</p>
+              <div className="form-grid">
+                <label className="span-two">
                   File URL
                   <input name="fileUrl" value={form.fileUrl} onChange={handleChange} placeholder="https://... or /media/..." />
                 </label>
@@ -602,7 +627,7 @@ function MoviesPanel({ adminId }) {
                   Resolution
                   <input name="resolution" placeholder="1080p" value={form.resolution} onChange={handleChange} />
                 </label>
-                <label className="admin-checkbox-label">
+                <label className="checkbox-label">
                   <input
                     type="checkbox"
                     name="isActive"
@@ -613,13 +638,13 @@ function MoviesPanel({ adminId }) {
                 </label>
               </div>
 
-              {formError ? <p className="admin-error">{formError}</p> : null}
+              {formError ? <p className="error-text">{formError}</p> : null}
 
-              <div className="admin-form-actions">
-                <button className="ghost-button" type="button" onClick={closeForm}>
+              <div className="form-buttons">
+                <button className="favorites-button" type="button" onClick={closeForm}>
                   Cancel
                 </button>
-                <button className="primary-button" type="submit" disabled={saving}>
+                <button className="watch-button" type="submit" disabled={saving}>
                   {saving ? 'Saving…' : editingId ? 'Save Changes' : 'Create Movie'}
                 </button>
               </div>
@@ -629,19 +654,19 @@ function MoviesPanel({ adminId }) {
       ) : null}
 
       {showImport ? (
-        <div className="admin-modal-backdrop" onClick={closeImport}>
-          <div className="admin-modal" onClick={(event) => event.stopPropagation()}>
+        <div className="modal-background" onClick={closeImport}>
+          <div className="modal-box" onClick={(event) => event.stopPropagation()}>
             <h2>Import Movies from JSON</h2>
-            <p className="admin-subtle">
+            <p className="subtle-text">
               Edit the placeholder JSON below with your movie details (or paste your own array of
               movies), then hit Import.
             </p>
 
-            <form className="admin-form" onSubmit={handleImportSubmit}>
+            <form className="modal-form" onSubmit={handleImportSubmit}>
               <label>
                 Movie JSON
                 <textarea
-                  className="admin-json-textarea"
+                  className="json-textarea"
                   rows={14}
                   spellCheck={false}
                   placeholder='[
@@ -670,13 +695,13 @@ function MoviesPanel({ adminId }) {
               </label>
 
               {importResult ? (
-                <div className={`admin-import-result ${importResult.errors.length ? 'has-errors' : ''}`}>
+                <div className={importResult.errors.length > 0 ? 'import-result has-errors' : 'import-result'}>
                   <p>
                     Imported <strong>{importResult.successCount}</strong> movie
                     {importResult.successCount === 1 ? '' : 's'}
-                    {importResult.errors.length ? `, ${importResult.errors.length} failed:` : '.'}
+                    {importResult.errors.length > 0 ? ', ' + importResult.errors.length + ' failed:' : '.'}
                   </p>
-                  {importResult.errors.length ? (
+                  {importResult.errors.length > 0 ? (
                     <ul>
                       {importResult.errors.map((message, index) => (
                         <li key={index}>{message}</li>
@@ -686,11 +711,11 @@ function MoviesPanel({ adminId }) {
                 </div>
               ) : null}
 
-              <div className="admin-form-actions">
-                <button className="ghost-button" type="button" onClick={closeImport}>
+              <div className="form-buttons">
+                <button className="favorites-button" type="button" onClick={closeImport}>
                   Close
                 </button>
-                <button className="primary-button" type="submit" disabled={importBusy || !importText.trim()}>
+                <button className="watch-button" type="submit" disabled={importBusy || !importText.trim()}>
                   {importBusy ? 'Importing…' : 'Import'}
                 </button>
               </div>
@@ -706,12 +731,12 @@ function MoviesPanel({ adminId }) {
 
 function repurchaseBadge(user) {
   if (user.repurchaseState === 'expired') {
-    return <span className="admin-badge admin-badge-danger">Expired · renew now</span>
+    return <span className="status-badge status-red">Expired · renew now</span>
   }
   if (user.daysRemaining <= 5) {
-    return <span className="admin-badge admin-badge-warning">{user.daysRemaining}d left · renew soon</span>
+    return <span className="status-badge status-yellow">{user.daysRemaining}d left · renew soon</span>
   }
-  return <span className="admin-badge admin-badge-active">{user.daysRemaining} days left</span>
+  return <span className="status-badge status-green">{user.daysRemaining} days left</span>
 }
 
 function UsersPanel({ adminId }) {
@@ -755,7 +780,11 @@ function UsersPanel({ adminId }) {
 
   const toggleRole = async (user) => {
     const nextRole = user.role === 'admin' ? 'user' : 'admin'
-    if (!confirm(`Make ${user.fullName} ${nextRole === 'admin' ? 'an admin' : 'a regular user'}?`)) return
+    const roleWord = nextRole === 'admin' ? 'an admin' : 'a regular user'
+    const confirmMessage = 'Make ' + user.fullName + ' ' + roleWord + '?'
+    if (!confirm(confirmMessage)) {
+      return
+    }
 
     setBusyId(user.id)
     try {
@@ -774,23 +803,23 @@ function UsersPanel({ adminId }) {
   }
 
   return (
-    <section className="admin-panel">
-      <div className="admin-panel-header">
+    <section className="panel">
+      <div className="panel-header">
         <div>
           <h1>Users</h1>
           <p>Everyone with a RedStream account, and when they'll need to renew.</p>
         </div>
       </div>
 
-      {error ? <p className="admin-error">{error}</p> : null}
+      {error ? <p className="error-text">{error}</p> : null}
 
       {loading ? (
-        <p className="admin-loading">Loading users…</p>
+        <p className="loading-text">Loading users…</p>
       ) : users.length === 0 ? (
-        <div className="empty-state">No users yet.</div>
+        <div className="empty-message">No users yet.</div>
       ) : (
-        <div className="admin-table-wrap">
-          <table className="admin-table">
+        <div className="table-wrapper">
+          <table className="data-table">
             <thead>
               <tr>
                 <th>Name</th>
@@ -803,40 +832,44 @@ function UsersPanel({ adminId }) {
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => (
-                <tr key={user.id}>
-                  <td>{user.fullName}</td>
-                  <td className="admin-subtle">{user.email}</td>
-                  <td className="admin-subtle">{user.phone}</td>
-                  <td>
-                    <span className={`admin-badge ${user.role === 'admin' ? 'admin-badge-active' : 'admin-badge-muted'}`}>
-                      {user.role}
-                    </span>
-                  </td>
-                  <td className="admin-subtle">
-                    {user.subscriptionStart ? new Date(user.subscriptionStart).toLocaleDateString() : '—'}
-                  </td>
-                  <td>{repurchaseBadge(user)}</td>
-                  <td>
-                    <div className="admin-row-actions">
-                      <button
-                        className="ghost-button"
-                        disabled={busyId === user.id}
-                        onClick={() => renewSubscription(user)}
-                      >
-                        Renew
-                      </button>
-                      <button
-                        className="ghost-button"
-                        disabled={busyId === user.id}
-                        onClick={() => toggleRole(user)}
-                      >
-                        {user.role === 'admin' ? 'Revoke admin' : 'Make admin'}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {users.map((user) => {
+                const roleBadgeClass = user.role === 'admin' ? 'status-badge status-green' : 'status-badge status-gray'
+                const roleButtonLabel = user.role === 'admin' ? 'Revoke admin' : 'Make admin'
+                const subscriptionDate = user.subscriptionStart
+                  ? new Date(user.subscriptionStart).toLocaleDateString()
+                  : '—'
+
+                return (
+                  <tr key={user.id}>
+                    <td>{user.fullName}</td>
+                    <td className="subtle-text">{user.email}</td>
+                    <td className="subtle-text">{user.phone}</td>
+                    <td>
+                      <span className={roleBadgeClass}>{user.role}</span>
+                    </td>
+                    <td className="subtle-text">{subscriptionDate}</td>
+                    <td>{repurchaseBadge(user)}</td>
+                    <td>
+                      <div className="row-buttons">
+                        <button
+                          className="favorites-button"
+                          disabled={busyId === user.id}
+                          onClick={() => renewSubscription(user)}
+                        >
+                          Renew
+                        </button>
+                        <button
+                          className="favorites-button"
+                          disabled={busyId === user.id}
+                          onClick={() => toggleRole(user)}
+                        >
+                          {roleButtonLabel}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
@@ -892,7 +925,7 @@ function ReportsPanel({ adminId }) {
   const deleteReport = async (report) => {
     if (!confirm('Delete this message?')) return
     try {
-      await callApi(`reports.php?id=${report.id}`, adminId, { method: 'DELETE' })
+      await callApi('reports.php?id=' + report.id, adminId, { method: 'DELETE' })
       setReports((current) => current.filter((r) => r.id !== report.id))
       if (selectedId === report.id) setSelectedId(null)
     } catch (err) {
@@ -903,82 +936,88 @@ function ReportsPanel({ adminId }) {
   const unreadCount = reports.filter((r) => !r.isRead).length
 
   return (
-    <section className="admin-panel">
-      <div className="admin-panel-header">
+    <section className="panel">
+      <div className="panel-header">
         <div>
           <h1>Reports</h1>
           <p>
             Messages submitted through the Contact page.{' '}
-            {unreadCount > 0 ? `${unreadCount} unread.` : 'All caught up.'}
+            {unreadCount > 0 ? unreadCount + ' unread.' : 'All caught up.'}
           </p>
         </div>
       </div>
 
-      {error ? <p className="admin-error">{error}</p> : null}
+      {error ? <p className="error-text">{error}</p> : null}
 
       {loading ? (
-        <p className="admin-loading">Loading reports…</p>
+        <p className="loading-text">Loading reports…</p>
       ) : reports.length === 0 ? (
-        <div className="empty-state">No messages yet.</div>
+        <div className="empty-message">No messages yet.</div>
       ) : (
-        <div className="admin-reports-layout">
-          <ul className="admin-inbox-list">
-            {reports.map((report) => (
-              <li
-                key={report.id}
-                className={`admin-inbox-item ${selectedId === report.id ? 'active' : ''} ${!report.isRead ? 'unread' : ''}`}
-                onClick={() => openReport(report)}
-              >
-                <div className="admin-inbox-row">
-                  <span className="admin-inbox-subject">{report.subject}</span>
-                  <span className="admin-inbox-time">
-                    {new Date(report.submittedAt).toLocaleDateString()}
-                  </span>
-                </div>
-                <p className="admin-inbox-preview">{report.message}</p>
-              </li>
-            ))}
+        <div className="messages-layout">
+          <ul className="message-list">
+            {reports.map((report) => {
+              let itemClass = 'message-item'
+              if (selectedId === report.id) {
+                itemClass = itemClass + ' active'
+              }
+              if (!report.isRead) {
+                itemClass = itemClass + ' unread'
+              }
+
+              return (
+                <li key={report.id} className={itemClass} onClick={() => openReport(report)}>
+                  <div className="message-row">
+                    <span className="message-subject">{report.subject}</span>
+                    <span className="message-time">
+                      {new Date(report.submittedAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <p className="message-preview">{report.message}</p>
+                </li>
+              )
+            })}
           </ul>
 
-          <div className="admin-report-detail">
+          <div className="message-detail">
             {selected ? (
               <>
-                <div className="admin-report-detail-header">
+                <div className="message-detail-header">
                   <div>
                     <h2>{selected.subject}</h2>
-                    <p className="admin-subtle">
-                      {selected.fullName ? `${selected.fullName} · ` : ''}
+                    <p className="subtle-text">
+                      {selected.fullName ? selected.fullName + ' · ' : ''}
                       {selected.email || 'No linked account'} ·{' '}
                       {new Date(selected.submittedAt).toLocaleString()}
                     </p>
                   </div>
-                  <div className="admin-report-detail-actions">
+                  <div className="message-detail-buttons">
                     {selected.isRead ? (
                       <button
-                        className="ghost-button"
+                        className="favorites-button"
                         onClick={() => setReadStatus(selected, false)}
                       >
                         Mark as unread
                       </button>
                     ) : (
                       <button
-                        className="ghost-button"
+                        className="favorites-button"
                         onClick={() => setReadStatus(selected, true)}
                       >
                         Mark as read
                       </button>
                     )}
-                    <button className="admin-danger-button" onClick={() => deleteReport(selected)}>
+                    <button className="delete-button" onClick={() => deleteReport(selected)}>
                       Delete
                     </button>
                   </div>
                 </div>
-                <p className={`admin-report-message ${!selected.isRead ? 'blurred' : ''}`}>
+                <p className={selected.isRead ? 'message-body' : 'message-body blurred'}>
                   {selected.message}
                 </p>
               </>
             ) : (
-              <div className="empty-state">Select a message to read it.</div>
+              <div className="empty-message">Select a message to read it.</div>
             )}
           </div>
         </div>

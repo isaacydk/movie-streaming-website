@@ -6,9 +6,9 @@
   grid-template-columns: minmax(170px, 1fr) minmax(260px, 520px) minmax(250px, 1fr);
   align-items: center;
   gap: 28px;
-  padding: 18px var(--page-pad);
-  background: rgba(5, 5, 5, 0.88);
-  border-bottom: 1px solid var(--line);
+  padding: 18px var(--page-padding);
+  background: #050505e0;
+  border-bottom: 1px solid var(--border-color);
   backdrop-filter: blur(16px);
 }
 
@@ -17,7 +17,7 @@
   align-items: center;
   justify-self: start;
   gap: 10px;
-  font-size: clamp(1.25rem, 2vw, 1.7rem);
+  font-size: 1.7rem;
   font-weight: 800;
 }
 
@@ -27,9 +27,9 @@
   height: 34px;
   place-items: center;
   border-radius: 6px;
-  background: var(--red);
+  background: var(--brand-red);
   color: white;
-  box-shadow: 0 0 24px rgba(229, 9, 20, 0.45);
+  box-shadow: 0 0 24px #e5091473;
 }
 
 .search-bar {
@@ -43,12 +43,12 @@
   width: 100%;
   min-height: 46px;
   padding: 0 50px 0 22px;
-  color: var(--text);
+  color: var(--text-color);
   background: #111;
   border: 1px solid transparent;
   border-radius: 999px;
   outline: 0;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 0 0 1px #ffffff08;
   transition:
     border-color 180ms ease,
     box-shadow 180ms ease,
@@ -65,14 +65,14 @@
 
 .search-bar input:focus {
   background: #151515;
-  border-color: rgba(229, 9, 20, 0.65);
-  box-shadow: 0 0 0 4px rgba(229, 9, 20, 0.14);
+  border-color: #e50914a6;
+  box-shadow: 0 0 0 4px #e5091424;
 }
 
 .search-icon {
   position: absolute;
   right: 17px;
-  color: var(--text);
+  color: var(--text-color);
   font-size: 25px;
   line-height: 1;
   pointer-events: none;
@@ -84,15 +84,15 @@
   inset: 0;
   display: grid;
   place-items: start center;
-  padding: clamp(72px, 10vh, 120px) 20px 32px;
-  background: rgba(0, 0, 0, 0.57);
+  padding: 120px 20px 32px;
+  background: #00000091;
   backdrop-filter: blur(12px);
   animation: search-fade-in 160ms ease-out;
 }
 
 .search-dialog {
   width: min(576px, 100%);
-  color: var(--text);
+  color: var(--text-color);
 }
 
 .search-dialog-heading {
@@ -115,7 +115,7 @@
   place-items: center;
   border: 0;
   border-radius: 50%;
-  color: var(--text);
+  color: var(--text-color);
   background: #111;
   font-size: 1.5rem;
 }
@@ -126,7 +126,7 @@
   gap: 12px;
   min-height: 50px;
   padding: 0 12px 0 18px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  border: 1px solid #ffffff38;
   border-radius: 999px;
   background: #111;
 }
@@ -140,7 +140,7 @@
   width: 100%;
   border: 0;
   outline: 0;
-  color: var(--text);
+  color: var(--text-color);
   background: transparent;
 }
 
@@ -157,13 +157,13 @@
   margin-top: 16px;
   overflow-y: auto;
   border-radius: 20px;
-  background: rgba(18, 18, 18, 0.97);
+  background: #121212f7;
 }
 
 .search-message {
   margin: 0;
   padding: 32px 22px;
-  color: var(--muted-strong);
+  color: var(--strong-muted-text);
   text-align: center;
 }
 
@@ -175,7 +175,7 @@
   gap: 14px;
   padding: 12px 18px;
   border: 0;
-  color: var(--text);
+  color: var(--text-color);
   background: transparent;
   text-align: left;
   cursor: pointer;
@@ -183,7 +183,7 @@
 
 .search-result:hover,
 .search-result:focus-visible {
-  background: rgba(255, 255, 255, 0.07);
+  background: #ffffff12;
   outline: 0;
 }
 
@@ -219,7 +219,7 @@
 
 .search-result-copy small,
 .search-result-rating {
-  color: var(--muted-strong);
+  color: var(--strong-muted-text);
 }
 
 .search-result-rating {
@@ -237,19 +237,19 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: clamp(18px, 3vw, 28px);
+  gap: 28px;
 }
 
 .nav-links {
   display: flex;
   justify-content: flex-end;
-  gap: clamp(14px, 3vw, 42px);
+  gap: 42px;
 }
 
 .nav-links a {
   position: relative;
   padding: 8px 0;
-  color: var(--muted-strong);
+  color: var(--strong-muted-text);
   font-weight: 700;
   transition: color 180ms ease;
 }
@@ -260,7 +260,7 @@
   bottom: 0;
   left: 0;
   height: 2px;
-  background: var(--red);
+  background: var(--brand-red);
   transform: scaleX(0);
   transform-origin: center;
   transition: transform 180ms ease;
@@ -283,8 +283,8 @@
   height: 38px;
   place-items: center;
   border-radius: 50%;
-  background: var(--surface);
-  border: 2px solid rgba(255, 255, 255, 0.12);
+  background: var(--card-background);
+  border: 2px solid #ffffff1f;
   color: white;
   font-size: 0.82rem;
   font-weight: 800;
@@ -296,8 +296,8 @@
 
 .profile-circle:hover,
 .profile-circle.active {
-  border-color: rgba(229, 9, 20, 0.75);
-  box-shadow: 0 0 20px rgba(229, 9, 20, 0.35);
+  border-color: #e50914bf;
+  box-shadow: 0 0 20px #e5091459;
   transform: translateY(-1px);
 }
 
@@ -315,11 +315,13 @@
   .nav-actions {
     width: 100%;
     justify-content: center;
+    gap: 18px;
   }
 
   .nav-links {
     width: 100%;
     justify-content: center;
+    gap: 14px;
   }
 }
 
@@ -327,6 +329,10 @@
   .navbar {
     padding-top: 14px;
     padding-bottom: 14px;
+  }
+
+  .brand {
+    font-size: 1.25rem;
   }
 
   .nav-links {

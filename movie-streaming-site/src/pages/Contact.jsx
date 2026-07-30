@@ -54,7 +54,7 @@ function Contact() {
           Have a movie request, feedback, or partnership idea? Reach the team and
           help shape the next version of the streaming experience.
         </p>
-        <a className="primary-button" href="mailto:hello@redstream.example">
+        <a className="watch-button" href="mailto:hello@redstream.example">
           Send Via email
         </a>
 
