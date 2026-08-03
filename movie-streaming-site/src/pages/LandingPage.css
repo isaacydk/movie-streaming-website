@@ -312,30 +312,35 @@
 
 .reason-card {
   position: relative;
-  min-height: 320px;
-  overflow: hidden;
-  padding: 34px 24px;
-  background:
-    radial-gradient(circle at 86% 88%, rgba(229, 9, 20, 0.2), transparent 8rem),
-    linear-gradient(145deg, #1a244b 0%, #22172d 58%, #251222 100%);
-  border-radius: 8px;
-}
+    min-height: auto;
+    overflow: visible;
+    padding: 34px 24px;
+    background:
+      radial-gradient(circle at 86% 88%, rgba(229, 9, 20, 0.2), transparent 8rem),
+      linear-gradient(145deg, #1a244b 0%, #22172d 58%, #251222 100%);
+    border-radius: 8px;
+  }
 
-.reason-card h3 {
-  max-width: 14ch;
-  margin: 0;
-  color: #fff;
-  font-size: clamp(1.28rem, 2vw, 1.55rem);
-  line-height: 1.35;
-  letter-spacing: 0;
-}
+  .reason-card h3 {
+    max-width: none;
+    margin: 0;
+    color: #fff;
+    font-size: clamp(1.28rem, 2vw, 1.55rem);
+    line-height: 1.35;
+    letter-spacing: 0;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+  }
 
-.reason-card p {
-  margin: 24px 0 0;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 1rem;
-  line-height: 1.42;
-}
+  .reason-card p {
+    margin: 24px 0 0;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 1rem;
+    line-height: 1.42;
+    white-space: normal;
+    overflow-wrap: break-word;
 
 .reason-icon {
   position: absolute;
@@ -718,9 +723,10 @@
   .reason-grid {
     grid-template-columns: 1fr;
   }
-
   .reason-card {
-    min-height: 250px;
+    /* allow card height to grow with content on small screens */
+    min-height: auto;
+    padding: 24px;
   }
 
   .plan-grid {
