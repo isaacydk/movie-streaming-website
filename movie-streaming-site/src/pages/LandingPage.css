@@ -312,7 +312,7 @@
 
 .reason-card {
   position: relative;
-    min-height: auto;
+    min-height: 320px;
     overflow: visible;
     padding: 34px 24px;
     background:
@@ -341,7 +341,7 @@
     line-height: 1.42;
     white-space: normal;
     overflow-wrap: break-word;
-
+  }
 .reason-icon {
   position: absolute;
   right: 24px;
@@ -727,6 +727,12 @@
     /* allow card height to grow with content on small screens */
     min-height: auto;
     padding: 24px;
+    overflow: hidden;
+  }
+
+  .reason-icon {
+    right: 16px;
+    bottom: 16px;
   }
 
   .plan-grid {
